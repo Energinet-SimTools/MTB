@@ -10,6 +10,6 @@ figure;title;units;emt_signal_1;emt_signal_2;emt_signal_3;rms_signal_1;rms_signa
 9;F;Hz;MTB\pll_f_hz;;;meas\s:f_hz;;;gradient;0.5;;
 10;Id_pll;pu;MTB\pll_pos_Id_pu;MTB\pll_neg_Id_pu;;;;;gradient;0.5;;
 11;Iq_pll;pu;MTB\pll_pos_Iq_pu;MTB\pll_neg_Iq_pu;;;;;gradient;0.5;;
-12;Terminal;pu;Unit_1\unit_fft_pos_Id_pu;Unit_1\unit_fft_pos_Iq_pu;Unit_1\unit_fft_pos_Vmag_pu;Unit_1\m:i1P:bus1 in p.u.;Unit_1\m:i1Q:bus1 in p.u.;Unit_1\m:u1:bus1 in p.u.;gradient;0.5;;
-13;Instantaneous Voltage (pg);kV;MTB\meas_Vag_kV;MTB\meas_Vbg_kV;MTB\meas_Vcg_kV;;;;gradient;0.5;1,2,3,4,5,6,7,8,9,10,98;
-14;Instantaneous Current (kA);kA;MTB\meas_Ia_kA;MTB\meas_Ib_kA;MTB\meas_Ic_kA;;;;gradient;0.5;1,2,3,4,5,6,7,8,9,10,98;
+12;Unit_1;pu;Unit_1\unit_fft_pos_Id_pu;Unit_1\unit_fft_pos_Iq_pu;Unit_1\unit_fft_pos_Vmag_pu;Unit_1\m:i1P:bus1 in p.u.;Unit_1\m:i1Q:bus1 in p.u.;Unit_1\m:u1:bus1 in p.u.;gradient;0.5;;
+13;Vpg (Inst.);kV;MTB\meas_Vag_kV;MTB\meas_Vbg_kV;MTB\meas_Vcg_kV;;;;gradient;0.5;1,2,3,4,5,6,7,8,9,10,98;
+14;Iline (Inst.);kA;MTB\meas_Ia_kA;MTB\meas_Ib_kA;MTB\meas_Ic_kA;;;;gradient;0.5;1,2,3,4,5,6,7,8,9,10,98;

@@ -164,7 +164,7 @@ def addResults(plots: List[go.Figure],
 
     assert nColumns > 0
 
-    if nColumns > 1:
+    if nColumns > 3: # Max figure columns
         plotlyFigure = plots[0]
     else:
         assert len(plots) == len(figures)
@@ -175,7 +175,7 @@ def addResults(plots: List[go.Figure],
     for figure in figures:
         fi += 1
 
-        if nColumns == 1:
+        if nColumns in (1,2,3):
             plotlyFigure = plots[fi]
         else:
             rowPos = (fi // nColumns) + 1
@@ -236,11 +236,11 @@ def addResults(plots: List[go.Figure],
 
 
 def update_y_and_x_axis(colPos, figure, nColumns, plotlyFigure, rowPos):
-    if nColumns == 1:
+    if nColumns in (1,2,3):
         yaxisTitle = f'[{figure.units}]'
     else:
         yaxisTitle = f'{figure.title}[{figure.units}]'
-    if nColumns == 1:
+    if nColumns in (1,2,3):
         plotlyFigure.update_xaxes(  # type: ignore
             title_text='Time[s]'
         )
@@ -260,7 +260,7 @@ def update_y_and_x_axis(colPos, figure, nColumns, plotlyFigure, rowPos):
 
 def add_scatterplot_for_result(colPos, colors, displayName, nColumns, plotlyFigure, resultName, rowPos, traces, x_value,
                                y_value):
-    if nColumns == 1:
+    if nColumns in (1,2,3):
         plotlyFigure.add_trace(  # type: ignore
             go.Scatter(
                 x=x_value,
@@ -355,7 +355,7 @@ def drawPlot(rank: int,
 
 
 def create_image_plots(columnNr, config, figureList, figurePath, imagePlots):
-    if columnNr == 1:
+    if columnNr in (1,2,3):
         # Combine all figures into a single plot, same as for nColumns > 1 but no grid needed
         combined_plot = make_subplots(rows=len(imagePlots), cols=1,
                                       subplot_titles=[fig.layout.title.text for fig in imagePlots])
@@ -393,7 +393,7 @@ def create_cursor_plots(columnNr, config, figurePath, imagePlotsCursors, ranksCu
     # Handle the cursor plots (which are tables)
     if len(ranksCursor) > 0:
         cursor_path = figurePath + "_cursor"
-        if columnNr == 1:
+        if columnNr in (1,2,3):
             # Create a combined plot for tables using the 'table' spec type
             combined_cursor_plot = make_subplots(rows=len(imagePlotsCursors), cols=1,
                                                  specs=[[{"type": "table"}]] * len(imagePlotsCursors),
@@ -432,7 +432,7 @@ def setupPlotLayout(caseDict, config, figureList, htmlPlots, imagePlots, rank):
         lst.append((config.imageColumns, imagePlots))
 
     for columnNr, plotList in lst:
-        if columnNr == 1:
+        if columnNr in (1,2,3):
             for fig in figureList:
                 # Create a direct Figure instead of subplots when there's only 1 column
                 plotList.append(go.Figure())  # Normal figure, no subplots
@@ -598,6 +598,16 @@ def create_html(plots: List[go.Figure], cursor_plots: List[go.Figure], path: str
                     }}
                 }});
     </script>
+    <script>
+    MathJax = {{
+      tex: {{
+              inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }}
+    }};
+    </script>
+    <script id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+    </script>
     {html_content}
     {html_content_cursors}
     {source_list}
@@ -610,7 +620,7 @@ def create_html(plots: List[go.Figure], cursor_plots: List[go.Figure], path: str
 
 
 def create_html_plots(columns, plots, title, rank):
-    if columns == 1:
+    if columns in (1,2,3):
         figur_links = '<div style="text-align: left; margin-top: 1px;">'
         figur_links += '<h4>Figures:</h4>'
         for p in plots:
@@ -622,10 +632,20 @@ def create_html_plots(columns, plots, title, rank):
         figur_links = ''
     html_content = f'<h1>Rank {rank}: {title}</h1>'
     html_content += figur_links
-    for p in plots:
+    html_content += '<table style="width:100%">'
+    for i, p in enumerate(plots):
         plot_title: str = p['layout']['title']['text']  # type: ignore
-        html_content += f'<div id="{plot_title}">' + p.to_html(full_html=False,
-                                                               include_plotlyjs='cdn') + '</div>'  # type: ignore
+
+        if ((i+1) % columns) == 1:
+            html_content += '<tr>'
+        html_content += f'<td><div id="{plot_title}">' + p.to_html(full_html=False,
+                                                               include_plotlyjs='cdn',
+                                                               include_mathjax='cdn',
+                                                               default_width='100%') + '</div></td>'  # type: ignore
+        if ((i+1) % columns) == 0:
+            html_content += '</tr>'
+
+    html_content += '</table>'
     return html_content
 
 
