@@ -1,4 +1,4 @@
-<workspace name="MTB_Setup_Example" version="5.0.2" crc="56193709">
+<workspace name="MTB_Setup_Example" version="5.0.2" crc="122972569">
   <paramlist name="options">
     <param name="compile_save_enable" value="false" />
     <param name="autosave_interval" value="0" />
@@ -23,7 +23,7 @@
     <param name="runtime_canvas_lock" value="0" />
   </paramlist>
   <projects>
-    <project type="library" name="MTB" filepath=".\MTB.pslx" />
+    <project type="library" name="MTB" filepath="..\MTB.pslx" />
     <project type="project" name="SimpleSolarFarm" filepath=".\SimpleSolarFarm.pscx" />
   </projects>
   <simulations>
