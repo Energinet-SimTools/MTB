@@ -96,14 +96,10 @@ def readCursorSetup(filePath: str) -> List[Cursor]:
     with open(filePath, newline='') as setupFile:
         setupReader = csv.DictReader(setupFile, delimiter=';')
         for row in setupReader:
-            row['cursor_options'] = list(
-                set([CursorType.from_string(str(item.strip())) for item in row.get('cursor_options', '').split(',') if item.strip() != '']))
-            row['emt_signals'] = list(
-                set([str(item.strip()) for item in row.get('emt_signals', '').split(',') if item.strip() != '']))
-            row['rms_signals'] = list(
-                set([str(item.strip()) for item in row.get('rms_signals', '').split(',') if item.strip() != '']))
-            row['time_ranges'] = list(
-                set([float(item.strip()) for item in row.get('time_ranges', '').split(',') if item.strip() != '']))
+            row['cursor_options'] = [CursorType.from_string(str(item.strip())) for item in row.get('cursor_options', '').split(',') if item.strip() != '']
+            row['emt_signals'] = [str(item.strip()) for item in row.get('emt_signals', '').split(',') if item.strip() != '']
+            row['rms_signals'] = [str(item.strip()) for item in row.get('rms_signals', '').split(',') if item.strip() != '']
+            row['time_ranges'] = [float(item.strip()) for item in row.get('time_ranges', '').split(',') if item.strip() != '']
             setup.append(row)
 
     rankList: List[Cursor] = list()

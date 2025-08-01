@@ -1,4 +1,5 @@
 from tsdownsample import MinMaxLTTBDownsampler
+from down_sampling_method import DownSamplingMethod
 from typing import List, Tuple
 import numpy as np
 import pandas as pd
@@ -11,6 +12,13 @@ def calculate_gradient(time, values):
     return gradient
 
 
+def downSample(x_value, y_value, downsampling_method, gradient_threshold):
+    if downsampling_method == DownSamplingMethod.GRADIENT:
+        x_value, y_value = downsample_based_on_gradient(x_value, y_value, gradient_threshold)
+    elif downsampling_method == DownSamplingMethod.AMOUNT:
+        x_value, y_value = down_sample(x_value, y_value)
+    return x_value, y_value
+        
 def downsample_based_on_gradient(time, values, gradient_threshold):
     values = pd.to_numeric(values, errors='coerce')
     gradient = calculate_gradient(time, values)
