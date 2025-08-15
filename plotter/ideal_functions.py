@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 import pandas as pd
-from scipy.signal import bilinear, lfilter
+#from scipy.signal import bilinear, lfilter
 from Result import ResultType
 
 
@@ -54,16 +54,16 @@ def genIdealResults(result, resultData, settingDict, caseDf, pscadInitTime):
             idealData.loc[mask, 'P_pu_PoC'] = newPpocSeries
             
             # Adding delay and LP filtering 
-            Ts = idealData.time.iloc[1]-idealData.time.iloc[0]
-            Td = 0.5            # delay time [s]
-            trise = 1           # rise time [s]
-            fc = 0.35/trise     # cut off frequency [Hz]
+            # Ts = idealData.time.iloc[1]-idealData.time.iloc[0]
+            # Td = 0.5            # delay time [s]
+            # trise = 1           # rise time [s]
+            # fc = 0.35/trise     # cut off frequency [Hz]
             
-            idealData['P_pu_PoC_Td'] = delay(idealData.P_pu_PoC, Td, Ts)        # Add new column for the delayed ideal signal
-            idealData['P_pu_PoC_Td_LPF'] = lpf(idealData.P_pu_PoC, fc, 1/Ts)    # Add new column for the filtered ideal signal
+            # idealData['P_pu_PoC_Td'] = delay(idealData.P_pu_PoC, Td, Ts)        # Add new column for the delayed ideal signal
+            # idealData['P_pu_PoC_Td_LPF'] = lpf(idealData.P_pu_PoC, fc, 1/Ts)    # Add new column for the filtered ideal signal
             
-            returnDict = {'figs': ['Ppoc', 'Ppoc', 'Ppoc'], 'signals': ['P_pu_PoC', 'P_pu_PoC_Td', 'P_pu_PoC_Td_LPF'], 'data': idealData}
-            #returnDict = {'figs': ['Ppoc'], 'signals': ['P_pu_PoC'], 'data': idealData}
+            # returnDict = {'figs': ['Ppoc', 'Ppoc', 'Ppoc'], 'signals': ['P_pu_PoC', 'P_pu_PoC_Td', 'P_pu_PoC_Td_LPF'], 'data': idealData}
+            returnDict = {'figs': ['Ppoc'], 'signals': ['P_pu_PoC'], 'data': idealData}
             
         # Q(U) control cases
         elif 'Ucontrol' in caseDf['Case']['Name'].squeeze():
@@ -74,7 +74,7 @@ def genIdealResults(result, resultData, settingDict, caseDf, pscadInitTime):
             
             # Only apply from t >= 0
             mask = idealData['time'] >= 0            
-            newQpocSeries = pd.Series([idealQU(Qref=Qref0, Uref=U0, uag=uag, s=s_V_droop) for uag in idealData.loc[mask,'meas_Vag_pu']],
+            newQpocSeries = pd.Series([idealQU(Qref=Qref0, Uref=U0, Upos=Upos, s=s_V_droop) for Upos in idealData.loc[mask,'fft_pos_Vmag_pu']],
                                        index=idealData.loc[mask].index)            
             idealData.loc[mask, 'Q_pu_PoC'] = newQpocSeries
             
@@ -117,51 +117,51 @@ def genIdealResults(result, resultData, settingDict, caseDf, pscadInitTime):
     return returnDict
 
 
-def lpf(x, fc, fs):
-    '''
-    Simple first order low pass filter with cut off frequency fc and sampling frequency fs
+# def lpf(x, fc, fs):
+#     '''
+#     Simple first order low pass filter with cut off frequency fc and sampling frequency fs
 
-    Parameters:
-        x: input signal 
-        fc: cut off frequency in Hz
-        fs: sampling frequency in Hz
+#     Parameters:
+#         x: input signal 
+#         fc: cut off frequency in Hz
+#         fs: sampling frequency in Hz
     
-    Returns:
-        filtered signal 
-    '''
-    wc = 2*np.pi*fc
-    b, a = bilinear([0, wc], [1, wc], fs)
+#     Returns:
+#         filtered signal 
+#     '''
+#     wc = 2*np.pi*fc
+#     b, a = bilinear([0, wc], [1, wc], fs)
 
-    return lfilter(b, a, x)
+#     return lfilter(b, a, x)
 
 
-def delay(x, Td, Ts):
-    '''
-    Simple signal delay of Td seconds with sampling time Ts
+# def delay(x, Td, Ts):
+#     '''
+#     Simple signal delay of Td seconds with sampling time Ts
 
-    Parameters:
-        x: input signal
-        Td: delay time in seconds
-        Ts: sampling time in seconds
+#     Parameters:
+#         x: input signal
+#         Td: delay time in seconds
+#         Ts: sampling time in seconds
 
-    Returns:
-        delayed signal
-    '''
-    delay_samples = int(round(Td/Ts))
-    b = np.zeros(delay_samples + 1)
-    b[delay_samples] = 1    # For a pure delay of N samples, b = [0, 0, ..., 0, 1] (where 1 is at index N)
-    a = np.array([1.0])     # For an FIR filter (pure delay), a = [1]
+#     Returns:
+#         delayed signal
+#     '''
+#     delay_samples = int(round(Td/Ts))
+#     b = np.zeros(delay_samples + 1)
+#     b[delay_samples] = 1    # For a pure delay of N samples, b = [0, 0, ..., 0, 1] (where 1 is at index N)
+#     a = np.array([1.0])     # For an FIR filter (pure delay), a = [1]
 
-    if delay_samples == 0:
-        return x  # No delay needed, return original signal
+#     if delay_samples == 0:
+#         return x  # No delay needed, return original signal
     
-    # Apply the filter to the input signal
-    return lfilter(b, a, x)
+#     # Apply the filter to the input signal
+#     return lfilter(b, a, x)
 
 
 def idealPramp(Pref, Tstep, Pstep, t):
     '''
-    This function calculates the ideal or maximum on rates of change of 
+    This function calculates the ideal or maximum rates of change of 
     active power output (Pramp) in both an up and down direction of for 
     a change in the active power reference for power-generating modules
     based on RfG (EU) 2016/631, 15.6 (e) NC 2025 (Version 4)
@@ -274,27 +274,36 @@ def idealFSM(Pref, f, DK=1, s=10, db=0):
     else:
         Pnew = Pref-100/s*(f-fn-db)/fn*Pn if f>fn+db else Pref        
     
+    # Clamp Pnew to to be not exceed Pref by +/- 10%
+    if Pnew > Pref+0.1*Pn: Pnew = Pref+0.1*Pn
+    if Pnew < Pref-0.1*Pn: Pnew = Pref-0.1*Pn
+    
     return Pnew
 
 
-def idealQU(Qref, Uref, uag, s):
+def idealQU(Qref, Uref, Upos, s):
     '''
     This function calculates the value of the reactive power required for voltage control
     mode based on RfG (EU) 2016/631, 21.3 (d) NC 2025 (Version 4)
 
     Parameters:
-        Qref in [pu] -- Qref is the actual Reactive Power output and not the nominal reactive power value
-        Uref in [pu] -- Uref is the actual voltage reference at the point of connection
-        uag in [pu] -- the measured phase to ground voltage at the point of connection    
-        s in [%] -- the voltage droop of the Q(U) control   
+        Qref in [pu] -- the Reactive Power reference (which by default is zero)
+        Uref in [pu] -- the voltage reference at the point of connection
+        Upos in [pu] -- the magnitude of the positive sequence voltage at the point of connection TODO: it should be selectable to be PoC or Terminal (LV/MV ?)    
+        s in [%]     -- the voltage droop of the Q(U) control   
 
     Returns:
         Qnew in [pu] -- the new value of Q at the point of connection
     '''
     Qnom = 0.33
-    du = Uref-uag
-    dq = 100*du/Uref*Qnom/s
-    Qnew = Qref + dq if Qref + dq <= Qnom else Qnom
+    dU = Uref-Upos
+    dQ = 100*dU/Uref*Qnom/s
+    if Qref + dQ > Qnom:
+        Qnew = Qnom
+    elif Qref + dQ < -Qnom:
+       Qnew = -Qnom 
+    else:
+        Qnew = Qref + dQ
         
     return Qnew
 
