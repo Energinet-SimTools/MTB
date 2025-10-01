@@ -26,7 +26,7 @@ class ReadConfig:
         self.imageColumns = parsedConf.getint('imageColumns')
         assert self.imageColumns > 0 or not self.genImage
         self.htmlCursorColumns = parsedConf.getint('htmlCursorColumns')
-        assert self.htmlCursorColumns > 0 or not self.genHTML
+        assert self.htmlCursorColumns > 0 or not self.genCursorHTML
         self.imageFormat = parsedConf['imageFormat']
         self.threads = parsedConf.getint('threads')
         assert self.threads > 0
@@ -87,7 +87,7 @@ def readFigureSetup(filePath: str) -> Dict[int, List[Figure]]:
 
 def readCursorSetup(filePath: str) -> List[Cursor]:
     '''
-    Read figure setup file.
+    Read cursor setup file.
     '''
     setup: List[Dict[str, str | List]] = list()
     with open(filePath, newline='') as setupFile:
