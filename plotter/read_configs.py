@@ -18,9 +18,9 @@ class ReadConfig:
         self.resultsDir = parsedConf['resultsDir']
         self.genHTML = parsedConf.getboolean('genHTML')
         self.genImage = parsedConf.getboolean('genImage')
-        self.genIdeal = parsedConf.getboolean('genIdeal')
-        self.genCursorPDF = parsedConf.getboolean('genCursorPDF')
+        self.genGuide = parsedConf.getboolean('genGuide')
         self.genCursorHTML = parsedConf.getboolean('genCursorHTML')
+        self.genCursorPDF = parsedConf.getboolean('genCursorPDF')
         self.htmlColumns = parsedConf.getint('htmlColumns')
         assert self.htmlColumns > 0 or not self.genHTML
         self.imageColumns = parsedConf.getint('imageColumns')
@@ -102,7 +102,7 @@ def readCursorSetup(filePath: str) -> List[Cursor]:
     rankList: List[Cursor] = list()
     for rankStr in setup:
         rankList.append(
-            Cursor(int(rankStr['rank']),  # type: ignore
+            Cursor(str(rankStr['rank']),  # type: ignore
                    str(rankStr['title']),
                    rankStr['cursor_options'],  # type: ignore
                    rankStr['emt_signals'],

@@ -176,12 +176,12 @@ def addCursorMetrics(ranksCursor, dfCursorsList, result, resultData, settingsDic
                         cursorMetricData.append(cursorSettlingTime(cursorSignalsDf, time_interval))
                     elif option.name == 'OVERSHOOT':
                         cursorMetricData.append(cursorPeakOvershoot(cursorSignalsDf, time_interval))
-                    elif option.name == 'FSM_SLOPE':
-                        cursorMetricData.append(cursorFSMSlope(cursorSignalsDf, time_interval, settingsDict))
-                    elif option.name == 'LFSM_SLOPE':
-                        cursorMetricData.append(cursoLFSMSlope(cursorSignalsDf, time_interval, settingsDict))
-                    elif option.name == 'QU_SLOPE':
-                        cursorMetricData.append(cursorQUSlope(cursorSignalsDf, time_interval, caseDf))
+                    elif option.name == 'FSM_DROOP':
+                        cursorMetricData.append(cursorFSMDroop(cursorSignalsDf, time_interval, settingsDict))
+                    elif option.name == 'LFSM_DROOP':
+                        cursorMetricData.append(cursoLFSMDroop(cursorSignalsDf, time_interval, settingsDict))
+                    elif option.name == 'QU_DROOP':
+                        cursorMetricData.append(cursorQUDroop(cursorSignalsDf, time_interval, caseDf))
                     else:
                         print(f'Cursor function {option} not defined')
                         
@@ -594,15 +594,15 @@ def cursorPeakOvershoot(cursorSignalsDf, time_interval):
     return cursorMetricText
 
 
-def cursorFSMSlope(cursorSignalsDf, time_interval, settingsDict):
+def cursorFSMDroop(cursorSignalsDf, time_interval, settingsDict):
     '''
-    Calculate the FSM slope of a signal over a time interval
-    The slope is calculated as the change in frequency (f) over the change in power (P)
-    The slope is expressed as a percentage of the nominal frequency (fn) and the reference power (Pref)
-    The slope is only activated after the FSM deadband is reached, 
+    Calculate the FSM droop of a signal over a time interval
+    The droop is calculated as the change in frequency (f) over the change in power (P)
+    The droop is expressed as a percentage of the nominal frequency (fn) and the reference power (Pref)
+    The droop is only activated after the FSM deadband is reached, 
     i.e. the FSM deadband is added to the nominal frequency (fn) for positive frequency changes and subtracted for negative frequency changes.
 
-    The slope is calculated as:
+    The droop is calculated as:
         df = fnew - fn + db if df < 0 else fnew - fn - db
         dP/dF = -100 * (df/fn) * (Pref/dP)
 
@@ -639,30 +639,30 @@ def cursorFSMSlope(cursorSignalsDf, time_interval, settingsDict):
             df = fnew - fn
     
             if Pnew == Pref:
-                fsmSlope = np.inf
+                fsmDroop = np.inf
             else:            
                 if df < 0:
-                    fsmSlope = -100*(fnew-fn+db)/(fn*(Pnew-Pref))
+                    fsmDroop = -100*(fnew-fn+db)/(fn*(Pnew-Pref))
                 else:
-                    fsmSlope = -100*(fnew-fn-db)/(fn*(Pnew-Pref))
+                    fsmDroop = -100*(fnew-fn-db)/(fn*(Pnew-Pref))
             
             # Construct the text
-            cursorMetricText = f"FSM slope: {fsmSlope:.2f}%"
+            cursorMetricText = f"FSM droop: {fsmDroop:.2f}%"
         else:
-            cursorMetricText = "FSM slope: error"
+            cursorMetricText = "FSM droop: error"
     else:
-        cursorMetricText = "FSM slope: error"
+        cursorMetricText = "FSM droop: error"
 
     return cursorMetricText
 
 
-def cursoLFSMSlope(cursorSignalsDf, time_interval, settingsDict):
+def cursoLFSMDroop(cursorSignalsDf, time_interval, settingsDict):
     '''
-    Calculate the FSM slope of a signal over a time interval
-    The slope is calculated as the change in frequency (f) over the change in power (P)
-    The slope is expressed as a percentage of the nominal frequency (fn) and the reference power (Pref)
+    Calculate the FSM droop of a signal over a time interval
+    The droop is calculated as the change in frequency (f) over the change in power (P)
+    The droop is expressed as a percentage of the nominal frequency (fn) and the reference power (Pref)
 
-    The slope is calculated as:
+    The droop is calculated as:
         dP/dF = -100 * (dF/fn) * (Pref/dP)
     where:
         dP = change in power (P)    
@@ -700,30 +700,30 @@ def cursoLFSMSlope(cursorSignalsDf, time_interval, settingsDict):
                 f1 = 50.5 if fnew > fn else 49.5
             else:
                 print('"DK" can either be "1" or "2"!')
-                cursorMetricText = "LFSM slope: error"
+                cursorMetricText = "LFSM droop: error"
             
             if Pnew == Pref:
-                lfsmSlope = np.inf
+                lfsmDroop = np.inf
             else:
-                lfsmSlope = -100*(fnew-f1)/(fn*(Pnew-Pref))
+                lfsmDroop = -100*(fnew-f1)/(fn*(Pnew-Pref))
                   
             # Construct the text
-            cursorMetricText = f"LFSM slope: {lfsmSlope:.2f}%"
+            cursorMetricText = f"LFSM droop: {lfsmDroop:.2f}%"
         else:
-            cursorMetricText = "LFSM slope: error"
+            cursorMetricText = "LFSM droop: error"
     else:
-        cursorMetricText = "LFSM slope: error"
+        cursorMetricText = "LFSM droop: error"
 
     return cursorMetricText
 
 
-def cursorQUSlope(cursorSignalsDf, time_interval, caseDf):
+def cursorQUDroop(cursorSignalsDf, time_interval, caseDf):
     '''
-    Calculate the Q(U) slope of a signal over a time interval
-    The slope is calculated as the change in reactive power (Q) over the change in voltage (U)
-    The slope is expressed as a percentage of the nominal reactive power (Qnom) and the nominal voltage (Uref)
+    Calculate the Q(U) droop of a signal over a time interval
+    The droop is calculated as the change in reactive power (Q) over the change in voltage (U)
+    The droop is expressed as a percentage of the nominal reactive power (Qnom) and the nominal voltage (Uref)
 
-    The slope is calculated as:
+    The droop is calculated as:
         dQ/dU = -100 * (dU/Uref) * (Qnom/dQ)
     
     where:
@@ -750,14 +750,14 @@ def cursorQUSlope(cursorSignalsDf, time_interval, caseDf):
             dq = q.iloc[-1] - q.iloc[0]
             du = u.iloc[-1] - u.iloc[0]
             
-            dquSlope = -100*du/Uref*Qnom/dq
+            dquDroop = -100*du/Uref*Qnom/dq
             
             # Construct the text
-            cursorMetricText = f"Q(U) slope: {dquSlope:.2f}%"
+            cursorMetricText = f"Q(U) droop: {dquDroop:.2f}%"
         else:
-            cursorMetricText = "Q(U) slope: error"
+            cursorMetricText = "Q(U) droop: error"
     else:
-        cursorMetricText = "Q(U) slope: error"
+        cursorMetricText = "Q(U) droop: error"
 
     return cursorMetricText
     
