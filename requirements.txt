@@ -1,8 +1,8 @@
 pandas
 openpyxl
 jinja2
-plotly
-kaleido
+plotly>=6.1.1
+kaleido>=1.0.1
 tsdownsample==0.1.3
 psutil
 mhi.psout

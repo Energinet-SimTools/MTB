@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from plotly.subplots import make_subplots  # type: ignore
 import plotly.graph_objects as go  # type: ignore
+import kaleido
 from typing import List, Dict, Union, Tuple, Set
 from sampling_functions import downSample
 from threading import Thread, Lock
@@ -860,6 +861,7 @@ def create_html_plots(columns, plots, rank, rankName):
 def main() -> None:
     start_time = time.time()
     config = ReadConfig()
+    kaleido.get_chrome_sync() # Make sure Kaleido is able to find the Chrome executable or install it if not available
 
     print('Starting plotter main thread')
 
