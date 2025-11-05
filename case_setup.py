@@ -57,7 +57,7 @@ class PlantSettings:
         self.SCR_min = float(inputs['SCR min'])
         self.SCR_tuning = float(inputs['SCR tuning'])
         self.SCR_max = float(inputs['SCR max'])
-        self.V_droop = float(inputs['V droop'])
+        self.Default_QUdroop = float(inputs['Default Q(U) droop'])
         self.XR_SCR_min = float(inputs['X/R SCR min'])
         self.XR_SCR_tuning = float(inputs['X/R SCR tuning'])
         self.XR_SCR_max = float(inputs['X/R SCR max'])
@@ -84,6 +84,7 @@ class Case:
         self.Pmode: str = str(case['Pmode'])
         self.Qmode: str = str(case['Qmode'])
         self.Qref0: float = float(case['Qref0'])
+        self.QUdroop0: str = str(case['QUdroop0']) # Use 'str' because 'default' is also a valid value for the droop
         self.SCR0: float = float(case['SCR0'])
         self.XR0: float = float(case['XR0'])
         self.Simulationtime: float = float(case['Simulationtime'])
@@ -237,6 +238,11 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
 
     mtb_t_qmode.addPFsub_S0('station_ctrl.ElmStactrl', 'i_ctrl', stactrl_mode_switch)
 
+    mtb_s_qudroop = signal('mtb_s_qudroop')
+    mtb_s_qudroop.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:10')
+    mtb_s_qudroop.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:10')
+    mtb_s_qudroop.addPFsub_S0('station_ctrl.ElmStactrl', 'ddroop')
+
     mtb_t_pmode = signal('mtb_t_pmode')
     mtb_t_pmode.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:7')
     mtb_t_pmode.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:7')
@@ -274,11 +280,6 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
     mtb_c_flattime_s = constant('mtb_c_flattime_s', plantSettings.PF_flat_time, pscad = False)
     mtb_c_flattime_s.addPFsub('initializer_script.ComDpl', 'IntExpr:3')
     mtb_c_flattime_s.addPFsub('initializer_qdsl.ElmQdsl', 'initVals:3')
-
-    mtb_c_vdroop = constant('mtb_c_vdroop', plantSettings.V_droop, pscad = False)
-    mtb_c_vdroop.addPFsub('initializer_script.ComDpl', 'IntExpr:10')
-    mtb_c_vdroop.addPFsub('initializer_qdsl.ElmQdsl', 'initVals:10')
-    mtb_c_vdroop.addPFsub('station_ctrl.ElmStactrl', 'ddroop')
 
     # Time and rank control
     mtb_t_simtimePscad_s = signal('mtb_t_simtimePscad_s', defaultConnection = False)
@@ -469,6 +470,11 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
         mtb_s_qref_5[case.rank] = case.Qref0 if mtb_t_qmode[case.rank].s0 == 5 else 0.0
         mtb_s_qref_6[case.rank] = case.Qref0 if mtb_t_qmode[case.rank].s0 == 6 else 0.0
 
+        if case.QUdroop0.lower() == "default":
+            mtb_s_qudroop[case.rank] = plantSettings.Default_QUdroop        
+        else:
+            mtb_s_qudroop[case.rank] = float(case.QUdroop0)
+
         mtb_t_pmode[case.rank] = PMODES[case.Pmode.lower()]
 
         # Fault signals
@@ -550,6 +556,10 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
                 assert isinstance(eventX2, float)
                 mtb_s_scr[case.rank].add(eventTime, eventX1, 0.0)
                 mtb_s_xr[case.rank].add(eventTime, eventX2, 0.0)
+
+            elif eventType == 'QUdroop':
+                assert isinstance(eventX1, float)
+                mtb_s_qudroop[case.rank].add(eventTime, eventX1, 0.0)
 
             elif eventType.count('fault') > 0 and eventType != 'Clear fault':
                 assert isinstance(eventX1, float)

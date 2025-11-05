@@ -9,8 +9,9 @@ from typing import Union, Dict, List, Tuple, Optional, Callable
 from math import isnan
 from copy import copy
 from warnings import warn
-from os.path import join, split, splitext, exists, abspath
-from os import mkdir
+from os.path import join, split, splitext, exists, abspath, basename
+from os import mkdir, getcwd
+from glob import glob
 import pandas as pd
 
 try:
@@ -26,7 +27,7 @@ except ImportError:
     warn('sim_interface.py: jinja2 module not found. (pscad functionality disabled)')
 
 
-MEAS_FILE_FOLDER : str = 'MTB_files' # constant
+MEAS_FILE_FOLDER : str = 'recordings_scaled' # constant
 
 pf_time_offset : float = 0.0
 pscad_time_offset : float = 0.0
@@ -363,13 +364,21 @@ class Recorded(Waveform):
             if not self.__pf__ or pf_time_offset != pscad_time_offset:
                 df.index = df.index + pscad_time_offset # type: ignore
                 df.rename(index={df.index[0] : time[0]}, inplace=True) # type: ignore
-
+            
             recFilePath = join(MEAS_FILE_FOLDER , f'{pathName}_{self.__column__}_{self.__scale__}_{pscad_time_offset}.out')
             measData = df.to_csv(None, sep = ' ', header=False, index_label=False).replace('\r\n','\n') # type: ignore
             measData = '\n' + measData
             f = open(recFilePath, 'w')
             f.write(measData)
-            f.close()        
+            f.close()
+            
+            if len(glob('*.pswx')) == 0:
+                if len(glob('..\*.pswx')) > 0:
+                    mtbBasePaht = basename(getcwd())
+                    recFilePath = join(mtbBasePaht, recFilePath)
+                else:
+                    raise RuntimeError('Could not find a PSCAD Workspace file ("*.pswx") in the current or parent folder.')
+
             self.__pscadPath__ = recFilePath
             self.__pscadLen__ = df.index[-1] # type: ignore
 
