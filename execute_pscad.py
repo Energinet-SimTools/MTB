@@ -54,7 +54,6 @@ from datetime import datetime
 import shutil
 import psutil #type: ignore
 from typing import List, Optional
-import pandas as pd
 import sim_interface as si
 import case_setup as cs
 from pscad_update_ums import updateUMs
@@ -190,14 +189,6 @@ def addInterfaceFile(project : mhi.pscad.Project):
     print('Adding interface.f to project')
     project.create_resource(r'.\interface.f')
 
-def writeCaseRankTaskIdCSV(emtCases):
-    data = []
-    for idx, case in enumerate(emtCases, start=1):
-        data.append({'Case Rank': case.rank, 'Task ID': idx, 'Case Name': case.Name})
-    
-    df = pd.DataFrame(data)
-    df.to_csv('caseRankTaskID.csv', index=False)
-    
 def main():
     print()
     print('execute_pscad.py started at:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), '\n')
@@ -233,8 +224,6 @@ def main():
         print(f'Excecuting only Rank {singleRank}: {singleName}')
     else:
         raise ValueError('Invalid rank selected for par_manualrank in MTB block.')
-
-    writeCaseRankTaskIdCSV(emtCases) # Save "Case Rank", "TaskID", "Case Name" in a .csv file for PSCAD OOM Recovery
 
     print()
     si.renderFortran('interface.f', channels)
