@@ -160,6 +160,8 @@ def setupResFiles(app : pf.Application, script : pf.ComPython, root : pf.DataObj
       'mtb_s_qref_q_pu.ElmDsl',
       'mtb_s_qref_qu_pu.ElmDsl',
       'mtb_s_qref_pf.ElmDsl',
+      'mtb_s_qudroop.ElmDsl',
+      'mtb_s_pavail_pu.ElmDsl',
       'mtb_s_qref_3.ElmDsl',
       'mtb_s_qref_4.ElmDsl',
       'mtb_s_qref_5.ElmDsl',
@@ -299,15 +301,29 @@ def addCustomSubscribers(thisScript : pf.ComPython, channels : List[si.Channel])
       return f'\\{sub_obj.GetFullName()}:{sub_attrib}={signal}:S~{sub_scale} * x' 
     return ''
 
+  pavail_conf = convertToConfStr('Pavail', 'mtb_s_pavail_pu')
   pref_conf = convertToConfStr('Pref', 'mtb_s_pref_pu')
   qref1_conf = convertToConfStr('Qref_q', 'mtb_s_qref_q_pu')
   qref2_conf = convertToConfStr('Qref_qu', 'mtb_s_qref_qu_pu')
   qref3_conf = convertToConfStr('Qref_pf', 'mtb_s_qref_pf')
+  qudroop_conf = convertToConfStr('QUdroop', 'mtb_s_qudroop')
   custom1_conf = convertToConfStr('Custom1', 'mtb_s_1')
   custom2_conf = convertToConfStr('Custom2', 'mtb_s_2')
   custom3_conf = convertToConfStr('Custom3', 'mtb_s_3')
+  custom4_conf = convertToConfStr('Custom4', 'mtb_s_4')
+  custom5_conf = convertToConfStr('Custom5', 'mtb_s_5')
+  custom6_conf = convertToConfStr('Custom6', 'mtb_s_6')
+  custom7_conf = convertToConfStr('Custom7', 'mtb_s_7')
+  custom8_conf = convertToConfStr('Custom8', 'mtb_s_8')
+  custom9_conf = convertToConfStr('Custom9', 'mtb_s_9')
+  custom10_conf = convertToConfStr('Custom10', 'mtb_s_10')
 
-  configs = custConfStr.split(';') + [pref_conf, qref1_conf, qref2_conf, qref3_conf, custom1_conf, custom2_conf, custom3_conf]
+  configs = (
+              custConfStr.split(';') + 
+              [pavail_conf, pref_conf, qref1_conf, qref2_conf, qref3_conf,qudroop_conf, 
+               custom1_conf, custom2_conf, custom3_conf, custom4_conf, custom5_conf, 
+               custom6_conf, custom7_conf, custom8_conf, custom9_conf, custom10_conf]
+             )
 
   confFilterStr = r"^([^:*?=\",~|\n\r]+):((?:\w:)?\w+(?::\d+)?)=(\w+):(S|s|S0|s0|R|r|T|t|C|c)~(.*)"
   confFilter = re.compile(confFilterStr)

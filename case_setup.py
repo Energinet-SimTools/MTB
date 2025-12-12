@@ -51,13 +51,14 @@ class PlantSettings:
         self.Run_custom_cases = bool(inputs['Run custom cases'])
         self.Projectname = str(inputs['Projectname']).replace(' ', '_')
         self.Pn = float(inputs['Pn']) 
+        self.Default_Pavail = float(inputs['Default P available'])
         self.Uc = float(inputs['Uc'])
         self.Un = float(inputs['Un'])
         self.Area = str(inputs['Area'])
         self.SCR_min = float(inputs['SCR min'])
         self.SCR_tuning = float(inputs['SCR tuning'])
         self.SCR_max = float(inputs['SCR max'])
-        self.V_droop = float(inputs['V droop'])
+        self.Default_QUdroop = float(inputs['Default Q(U) droop'])
         self.XR_SCR_min = float(inputs['X/R SCR min'])
         self.XR_SCR_tuning = float(inputs['X/R SCR tuning'])
         self.XR_SCR_max = float(inputs['X/R SCR max'])
@@ -81,9 +82,11 @@ class Case:
         self.Name: str = str(case['Name'])
         self.U0: float = float(case['U0'])
         self.P0: float = float(case['P0'])
+        self.Pavail0: str = str(case['Pavail0']) # Use 'str' because 'default' is also a valid value for the droop
         self.Pmode: str = str(case['Pmode'])
         self.Qmode: str = str(case['Qmode'])
         self.Qref0: float = float(case['Qref0'])
+        self.QUdroop0: str = str(case['QUdroop0']) # Use 'str' because 'default' is also a valid value for the droop
         self.SCR0: float = float(case['SCR0'])
         self.XR0: float = float(case['XR0'])
         self.Simulationtime: float = float(case['Simulationtime'])
@@ -164,10 +167,10 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
     mtb_t_vmode = signal('mtb_t_vmode', defaultConnection = False) # only to be used in PSCAD
     mtb_s_vref_pu = signal('mtb_s_vref_pu', measFile = True)
     mtb_s_vref_pu.addPFsub_S0('vac.ElmVac', 'usetp', lambda _, x : abs(x))
-    mtb_s_vref_pu.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:5', lambda _, x : abs(x))
-    mtb_s_vref_pu.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:5', lambda _, x : abs(x))
-    mtb_s_vref_pu.addPFsub_T('initializer_script.ComDpl', 'IntExpr:4', lambda _, x : abs(x))
-    mtb_s_vref_pu.addPFsub_T('initializer_qdsl.ElmQdsl', 'initVals:4', lambda _, x : abs(x))
+    mtb_s_vref_pu.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:5', lambda _, x : abs(x)) #U0
+    mtb_s_vref_pu.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:5', lambda _, x : abs(x)) #U0
+    mtb_s_vref_pu.addPFsub_T('initializer_script.ComDpl', 'IntExpr:4', lambda _, x : abs(x)) #vmode
+    mtb_s_vref_pu.addPFsub_T('initializer_qdsl.ElmQdsl', 'initVals:4', lambda _, x : abs(x)) #vmode
 
     mtb_s_dvref_pu = signal('mtb_s_dvref_pu')
     mtb_s_phref_deg = signal('mtb_s_phref_deg', measFile = True)
@@ -180,12 +183,12 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
 
     # Grid impedance
     mtb_s_scr = signal('mtb_s_scr')
-    mtb_s_scr.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:11')
-    mtb_s_scr.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:11')
+    mtb_s_scr.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:12') #SCR0
+    mtb_s_scr.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:12') #SCR0
 
     mtb_s_xr = signal('mtb_s_xr')
-    mtb_s_xr.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:12')
-    mtb_s_xr.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:12')
+    mtb_s_xr.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:13') #XR0
+    mtb_s_xr.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:13') #XR0
 
     ldf_t_uk = signal('ldf_t_uk', pscad = False, defaultConnection = False)
     ldf_t_uk.addPFsub_S0('z.ElmSind', 'uk')
@@ -203,13 +206,17 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
 
     # Standard plant references and outputs
     mtb_s_pref_pu = signal('mtb_s_pref_pu', measFile = True)
-    mtb_s_pref_pu.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:6')
-    mtb_s_pref_pu.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:6')
+    mtb_s_pref_pu.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:6') #P0
+    mtb_s_pref_pu.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:6') #P0
     mtb_s_pref_pu.addPFsub_S0('powerf_ctrl.ElmSecctrl', 'psetp', lambda _, x : x * plantSettings.Pn)
 
+    mtb_s_pavail_pu = signal('mtb_s_pavail_pu', measFile = True)
+    mtb_s_pavail_pu.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:7') #Pavail0
+    mtb_s_pavail_pu.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:7') #Pavail0
+
     mtb_s_qref = signal('mtb_s_qref', measFile = True)
-    mtb_s_qref.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:9')
-    mtb_s_qref.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:9')
+    mtb_s_qref.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:10') #Qref0
+    mtb_s_qref.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:10') #Qref0
     mtb_s_qref.addPFsub_S0('station_ctrl.ElmStactrl', 'usetp', lambda _, x: 1.0 if x <= 0.0 else x)
     mtb_s_qref.addPFsub_S0('station_ctrl.ElmStactrl', 'qsetp', lambda _, x : -x * plantSettings.Pn)
     mtb_s_qref.addPFsub_S0('station_ctrl.ElmStactrl', 'pfsetp', lambda _, x: min(abs(x), 1.0))
@@ -223,9 +230,14 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
     mtb_s_qref_5 = signal('mtb_s_qref_5', measFile = True)
     mtb_s_qref_6 = signal('mtb_s_qref_6', measFile = True)
 
+    mtb_s_qudroop = signal('mtb_s_qudroop')
+    mtb_s_qudroop.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:11') #QUdroop0
+    mtb_s_qudroop.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:11') #QUdroop0
+    mtb_s_qudroop.addPFsub_S0('station_ctrl.ElmStactrl', 'ddroop')
+    
     mtb_t_qmode = signal('mtb_t_qmode')
-    mtb_t_qmode.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:8')
-    mtb_t_qmode.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:8')
+    mtb_t_qmode.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:9') #Qmode
+    mtb_t_qmode.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:9') #Qmode
 
     def stactrl_mode_switch(self : si.Signal, qmode : float):
         if qmode == 1:
@@ -238,13 +250,13 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
     mtb_t_qmode.addPFsub_S0('station_ctrl.ElmStactrl', 'i_ctrl', stactrl_mode_switch)
 
     mtb_t_pmode = signal('mtb_t_pmode')
-    mtb_t_pmode.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:7')
-    mtb_t_pmode.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:7')
+    mtb_t_pmode.addPFsub_S0('initializer_script.ComDpl', 'IntExpr:8') #Pmode
+    mtb_t_pmode.addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:8') #Pmode
 
-    # Constants
+    # Constants    
     mtb_c_pn = constant('mtb_c_pn', plantSettings.Pn)
-    mtb_c_pn.addPFsub('initializer_script.ComDpl', 'IntExpr:0')
-    mtb_c_pn.addPFsub('initializer_qdsl.ElmQdsl', 'initVals:0')
+    mtb_c_pn.addPFsub('initializer_script.ComDpl', 'IntExpr:0') #Pn
+    mtb_c_pn.addPFsub('initializer_qdsl.ElmQdsl', 'initVals:0') #Pn
     mtb_c_pn.addPFsub('measurements.ElmDsl', 'pn')
     mtb_c_pn.addPFsub('rx_calc.ElmDsl', 'pn')
     mtb_c_pn.addPFsub('z.ElmSind', 'Sn')
@@ -253,8 +265,8 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
     mtb_c_qn.addPFsub('station_ctrl.ElmStactrl', 'Srated')
 
     mtb_c_vbase = constant('mtb_c_vbase', plantSettings.Un)
-    mtb_c_vbase.addPFsub('initializer_script.ComDpl', 'IntExpr:1')
-    mtb_c_vbase.addPFsub('initializer_qdsl.ElmQdsl', 'initVals:1')
+    mtb_c_vbase.addPFsub('initializer_script.ComDpl', 'IntExpr:1') #Vbase
+    mtb_c_vbase.addPFsub('initializer_qdsl.ElmQdsl', 'initVals:1') #Vbase
     mtb_c_vbase.addPFsub('measurements.ElmDsl', 'vbase')
     mtb_c_vbase.addPFsub('pcc.ElmTerm', 'uknom')
     mtb_c_vbase.addPFsub('ext.ElmTerm', 'uknom')
@@ -265,20 +277,15 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
     mtb_c_vbase.addPFsub('vac.ElmVac', 'Unom')
 
     mtb_c_vc = constant('mtb_c_vc', plantSettings.Uc)
-    mtb_c_vc.addPFsub('initializer_script.ComDpl', 'IntExpr:2')
-    mtb_c_vc.addPFsub('initializer_qdsl.ElmQdsl', 'initVals:2')
+    mtb_c_vc.addPFsub('initializer_script.ComDpl', 'IntExpr:2') #Vc
+    mtb_c_vc.addPFsub('initializer_qdsl.ElmQdsl', 'initVals:2') #Vc
     mtb_c_vc.addPFsub('rx_calc.ElmDsl', 'vc')
 
     constant('mtb_c_inittime_s', plantSettings.PSCAD_init_time)
 
     mtb_c_flattime_s = constant('mtb_c_flattime_s', plantSettings.PF_flat_time, pscad = False)
-    mtb_c_flattime_s.addPFsub('initializer_script.ComDpl', 'IntExpr:3')
-    mtb_c_flattime_s.addPFsub('initializer_qdsl.ElmQdsl', 'initVals:3')
-
-    mtb_c_vdroop = constant('mtb_c_vdroop', plantSettings.V_droop, pscad = False)
-    mtb_c_vdroop.addPFsub('initializer_script.ComDpl', 'IntExpr:10')
-    mtb_c_vdroop.addPFsub('initializer_qdsl.ElmQdsl', 'initVals:10')
-    mtb_c_vdroop.addPFsub('station_ctrl.ElmStactrl', 'ddroop')
+    mtb_c_flattime_s.addPFsub('initializer_script.ComDpl', 'IntExpr:3') #flat_time
+    mtb_c_flattime_s.addPFsub('initializer_qdsl.ElmQdsl', 'initVals:3') #flat_time
 
     # Time and rank control
     mtb_t_simtimePscad_s = signal('mtb_t_simtimePscad_s', defaultConnection = False)
@@ -296,35 +303,35 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
     mtb_s : List[si.Signal] = []
     # Custom signals
     mtb_s.append(signal('mtb_s_1', measFile = True))
-    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:13')
-    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:13')
+    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:14') #Signal_1_t0
+    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:14') #Signal_1_t0
     mtb_s.append(signal('mtb_s_2', measFile = True))
-    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:14')
-    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:14')
+    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:15') #Signal_2_t0
+    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:15') #Signal_2_t0
     mtb_s.append(signal('mtb_s_3', measFile = True))
-    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:15')
-    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:15')
+    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:16') #Signal_3_t0
+    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:16') #Signal_3_t0
     mtb_s.append(signal('mtb_s_4', measFile = True))
-    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:16')
-    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:16')
+    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:17') #Signal_4_t0
+    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:17') #Signal_4_t0
     mtb_s.append(signal('mtb_s_5', measFile = True))
-    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:17')
-    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:17')
+    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:18') #Signal_5_t0
+    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:18') #Signal_5_t0
     mtb_s.append(signal('mtb_s_6', measFile = True))
-    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:18')
-    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:18')
+    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:19') #Signal_6_t0
+    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:19') #Signal_6_t0
     mtb_s.append(signal('mtb_s_7', measFile = True))
-    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:19')
-    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:19')
+    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:20') #Signal_7_t0
+    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:20') #Signal_7_t0
     mtb_s.append(signal('mtb_s_8', measFile = True))
-    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:20')
-    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:20')
+    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:21') #Signal_8_t0
+    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:21') #Signal_8_t0
     mtb_s.append(signal('mtb_s_9', measFile = True))
-    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:21')
-    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:21')
+    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:22') #Signal_9_t0
+    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:22') #Signal_9_t0
     mtb_s.append(signal('mtb_s_10', measFile = True))
-    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:22')
-    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:22')
+    mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:23') #Signal_10_t0
+    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:23') #Signal_10_t0
 
     # Powerfactory references
     ldf_r_vcNode = pfObjRefer('mtb_r_vcNode')
@@ -332,10 +339,12 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
 
     # Refences outserv time invariants
     ldf_t_refOOS = signal('ldf_t_refOOS', pscad = False, defaultConnection = False)
+    ldf_t_refOOS.addPFsub_S0('mtb_s_pavail_pu.ElmDsl', 'outserv')
     ldf_t_refOOS.addPFsub_S0('mtb_s_pref_pu.ElmDsl', 'outserv')
     ldf_t_refOOS.addPFsub_S0('mtb_s_qref_q_pu.ElmDsl', 'outserv')
     ldf_t_refOOS.addPFsub_S0('mtb_s_qref_qu_pu.ElmDsl', 'outserv')
     ldf_t_refOOS.addPFsub_S0('mtb_s_qref_pf.ElmDsl', 'outserv')
+    ldf_t_refOOS.addPFsub_S0('mtb_s_qudroop.ElmDsl', 'outserv')
     ldf_t_refOOS.addPFsub_S0('mtb_t_qmode.ElmDsl', 'outserv')
     ldf_t_refOOS.addPFsub_S0('mtb_t_pmode.ElmDsl', 'outserv')
     ldf_t_refOOS.addPFsub_S0('mtb_s_1.ElmDsl', 'outserv')
@@ -452,6 +461,11 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
         mtb_t_x0_ohm[case.rank] = plantSettings.X0
         
         # Standard plant references and outputs default setup
+        if case.Pavail0.lower() == "default":
+            mtb_s_pavail_pu[case.rank] = plantSettings.Default_Pavail        
+        else:
+            mtb_s_pavail_pu[case.rank] = float(case.Pavail0)
+        
         mtb_s_pref_pu[case.rank] = case.P0
         
         # Set Qmode
@@ -468,6 +482,11 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
         mtb_s_qref_4[case.rank] = case.Qref0 if mtb_t_qmode[case.rank].s0 == 4 else 0.0
         mtb_s_qref_5[case.rank] = case.Qref0 if mtb_t_qmode[case.rank].s0 == 5 else 0.0
         mtb_s_qref_6[case.rank] = case.Qref0 if mtb_t_qmode[case.rank].s0 == 6 else 0.0
+
+        if case.QUdroop0.lower() == "default":
+            mtb_s_qudroop[case.rank] = plantSettings.Default_QUdroop        
+        else:
+            mtb_s_qudroop[case.rank] = float(case.QUdroop0)
 
         mtb_t_pmode[case.rank] = PMODES[case.Pmode.lower()]
 
@@ -499,13 +518,18 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
             eventX2 = event[3]
 
             if eventType == 'Pref':
-                assert isinstance(eventX1, float)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, float), f'X1 should be the new Pref setpoint in pu based on Pn, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the gradient in 1/s of the new Pref setpoint change, and not "{eventX2}"'
                 mtb_s_pref_pu[case.rank].add(eventTime, eventX1, eventX2)
 
+            elif eventType == 'Pavail':
+                assert isinstance(eventX1, float), f'X1 should be the new Pavail limit in pu based on Pn, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the gradient in 1/s of the new Pavail limit change, and not "{eventX2}"'
+                mtb_s_pavail_pu[case.rank].add(eventTime, eventX1, eventX2)
+
             elif eventType == 'Qref':
-                assert isinstance(eventX1, float)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, float), f'X1 should be the new Qref setpoint in pu based on Pn, and not "{eventX1}"'
+                assert isinstance(eventX2, float),f'X2 should be the gradient in 1/s of the new Qref setpoint change, and not "{eventX2}"'
                 mtb_s_qref[case.rank].add(eventTime, eventX1, eventX2)
 
                 if mtb_t_qmode[case.rank].s0 == 0:
@@ -525,35 +549,39 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
                 else:
                     raise ValueError('Invalid Q mode')
 
+            elif eventType == 'QUdroop':
+                assert isinstance(eventX1, float), f'X1 should be the new Q(U) droop in % based on Pn, and not "{eventX1}"'
+                mtb_s_qudroop[case.rank].add(eventTime, eventX1, 0.0)
+
             elif eventType == 'Voltage':
-                assert isinstance(eventX1, float)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, float), f'X1 should be the new Thévenin grid voltage in pu based on Un, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the gradient in 1/s of the new Thévenin grid voltage change, and not "{eventX2}"'
                 mtb_s_vref_pu[case.rank].add(eventTime, eventX1, eventX2)
 
             elif eventType == 'dVoltage':
-                assert isinstance(eventX1, float)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, float), f'X1 should be the delta change in the Thévenin grid voltage in pu based on Un, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the gradient in 1/s of delta change in the Thévenin grid voltage, and not "{eventX2}"'
                 mtb_s_dvref_pu[case.rank].add(eventTime, eventX1, eventX2)
 
             elif eventType == 'Phase':
-                assert isinstance(eventX1, float)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, float), f'X1 should be the new Thévenin grid voltage phase in degrees, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the gradient in 1/s of the new Thévenin grid voltage phase change, and not "{eventX2}"'
                 mtb_s_phref_deg[case.rank].add(eventTime, eventX1, eventX2)
 
             elif eventType == 'Frequency':
-                assert isinstance(eventX1, float)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, float), f'X1 should be the new Thévenin grid voltage frequency in Hz, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the gradient in 1/s of the new Thévenin grid voltage frequency change, and not "{eventX2}"'
                 mtb_s_fref_hz[case.rank].add(eventTime, eventX1, eventX2)
 
             elif eventType == 'SCR':
-                assert isinstance(eventX1, float)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, float), f'X1 should be the new Short Circuit Ratio (SCR) of the Thévenin grid, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the new X/R ratio of the Thévenin grid, and not "{eventX2}"'
                 mtb_s_scr[case.rank].add(eventTime, eventX1, 0.0)
                 mtb_s_xr[case.rank].add(eventTime, eventX2, 0.0)
 
             elif eventType.count('fault') > 0 and eventType != 'Clear fault':
-                assert isinstance(eventX1, float)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, float), f'X1 should be the residual voltage (across the fault reactance) in pu based on Un, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the fault time in s, and not "{eventX2}"'
 
                 flt_s_type[case.rank].add(eventTime, FAULT_TYPES[eventType], 0.0)
                 flt_s_type[case.rank].add(eventTime + eventX2, 0.0, 0.0)
@@ -566,15 +594,15 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
                 flt_s_type[case.rank].add(eventTime, 0.0, 0.0)
 
             elif eventType == 'Pref recording':
-                assert isinstance(eventX1, str)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, str), f'X1 should be the relative path to the measurement file used for Pref, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the scaling factor for the measurement file used for Pref, and not "{eventX2}"'
                 wf = mtb_s_pref_pu[case.rank] = si.Recorded(path=eventX1, column=1, scale=eventX2, pf=pf, pscad=pscad)
                 pscad_lonRec = max(wf.pscadLen, pscad_lonRec)
                 pf_lonRec = max(wf.pfLen, pf_lonRec)
 
             elif eventType == 'Qref recording':
-                assert isinstance(eventX1, str)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, str), f'X1 should be the relative path to the measurement file used for Qref, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the scaling factor for the measurement file used for Qref, and not "{eventX2}"'
                 wf = si.Recorded(path=eventX1, column=1, scale=eventX2, pf=pf, pscad=pscad)
 
                 mtb_s_qref[case.rank] = wf
@@ -607,8 +635,8 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
                 pf_lonRec = max(wf.pfLen, pf_lonRec)
 
             elif eventType == 'Voltage recording':
-                assert isinstance(eventX1, str)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, str), f'X1 should be the relative path to the measurement file used for the Thévening grid voltage, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the scaling factor for the measurement file used for the Thévening grid voltage, and not "{eventX2}"'
                 if mtb_t_vmode[case.rank].s0 != 2:
                     mtb_t_vmode[case.rank] = 1
                 wf = mtb_s_vref_pu[case.rank] = si.Recorded(path=eventX1, column=1, scale=eventX2, pf=pf, pscad=pscad)
@@ -616,8 +644,8 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
                 pf_lonRec = max(wf.pfLen, pf_lonRec)
 
             elif eventType == 'Inst. Voltage recording':
-                assert isinstance(eventX1, str)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, str), f'X1 should be the relative path to the measurement file used for the instantaneous Thévening grid voltage, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the scaling factor for the measurement file used for the instantaneous Thévening grid voltage, and not "{eventX2}"'
                 mtb_t_vmode[case.rank] = 2
                 mtb_s_varef_pu[case.rank] = si.Recorded(path=eventX1, column=1, scale=eventX2, pf=False, pscad=pscad)
                 mtb_s_vbref_pu[case.rank] = si.Recorded(path=eventX1, column=2, scale=eventX2, pf=False, pscad=pscad)
@@ -625,15 +653,15 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
                 pscad_lonRec = max(wf.pscadLen, pscad_lonRec)
 
             elif eventType == 'Phase recording':
-                assert isinstance(eventX1, str)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, str), f'X1 should be the relative path to the measurement file used for the Thévening grid voltage phase, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the scaling factor for the measurement file used for the Thévening grid voltage phase, and not "{eventX2}"'
                 wf = mtb_s_phref_deg[case.rank] = si.Recorded(path=eventX1, column=1, scale=eventX2, pf=pf, pscad=pscad)
                 pscad_lonRec = max(wf.pscadLen, pscad_lonRec)
                 pf_lonRec = max(wf.pfLen, pf_lonRec)
 
             elif eventType == 'Frequency recording':
-                assert isinstance(eventX1, str)
-                assert isinstance(eventX2, float)
+                assert isinstance(eventX1, str), f'X1 should be the relative path to the measurement file used for the Thévening grid voltage frequency, and not "{eventX1}"'
+                assert isinstance(eventX2, float), f'X2 should be the scaling factor for the measurement file used for the Thévening grid voltage frequency, and not "{eventX2}"'
                 wf = mtb_s_fref_hz[case.rank] = si.Recorded(path=eventX1, column=1, scale=eventX2, pf=pf, pscad=pscad)
                 pscad_lonRec = max(wf.pscadLen, pscad_lonRec)
                 pf_lonRec = max(wf.pfLen, pf_lonRec)
