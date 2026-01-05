@@ -99,15 +99,13 @@ def genGuideResults(result, resultData, settingDict, caseDf, pscadInitTime):
         if caseDf['Initial Settings']['Qmode'].squeeze() == 'Q(U)' or caseDf['Initial Settings']['Qmode'].squeeze() == 'Default' and  Qdefault == 'Q(U)':
             DK = 1 if settingDict['Area']=='DK1' else 2                         # DK area, either 1 or 2
             DSO = True if settingDict['Un']<110 else False                      # DSO, either Energinet (TSO))
-            s_V_droop = settingDict['V droop']                                  # Vdroop value
-            #Uref0 = caseDf['Initial Settings']['Qref0'].squeeze()              # Note: If Qmode == 'Q(U)', then Qref0 = Uref0
-            Qref0 = 0.0
+            Qref0 = 0.0                                                         # Note: This is the initial reactive power reference
 
             guideData['Q_pu_QU_Inst'] = Qref0      # Create new signal to populate
             for i, row in guideData.iterrows():
                 if row['time'] < tThresh:
                     continue
-                QpuQU = guideQU(Uref=row['mtb_s_qref'], Upos=row['fft_pos_Vmag_pu'], s=s_V_droop, Qref=Qref0, DK=DK , DSO=DSO) # Note: If Qmode == 'Q(U)', then 'mtb_s_qref' = Uref
+                QpuQU = guideQU(Uref=row['mtb_s_qref'], Upos=row['fft_pos_Vmag_pu'], s=row['mtb_s_qudroop'], Qref=Qref0, DK=DK , DSO=DSO) # Note: If Qmode == 'Q(U)', then 'mtb_s_qref' = Uref
                 guideData.loc[i, 'Q_pu_QU_Inst'] = QpuQU 
                 
             # Change LPF setting for Q(U)
