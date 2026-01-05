@@ -37,12 +37,12 @@ def getUniqueEmtSignals(figureList):
     Python's "set()" could also be used, but then the order of the signals in the DataFrame would change
     '''
     
-    emt_signals = ['MTB\mtb_s_pavail_pu',
-                   'MTB\mtb_s_qudroop',
-                   'MTB\mtb_s_1',
-                   'MTB\mtb_s_2',
-                   'MTB\mtb_s_3',
-                   'MTB\mtb_s_4']
+    emt_signals = ['MTB\\mtb_s_pavail_pu',
+                   'MTB\\mtb_s_qudroop',
+                   'MTB\\mtb_s_1',
+                   'MTB\\mtb_s_2',
+                   'MTB\\mtb_s_3',
+                   'MTB\\mtb_s_4']
     
     for fig in figureList:
         if fig.emt_signal_1 != '': emt_signals.append(fig.emt_signal_1)
