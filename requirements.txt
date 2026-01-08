@@ -8,3 +8,4 @@ psutil
 mhi.psout
 pypdf
 scipy>=1.10.1
+tqdm
