@@ -72,8 +72,8 @@ except ImportError:
     sys.exit(1)
 
 def connectPSCAD() -> mhi.pscad.PSCAD:
-    pid = os.getpid()
-    ports = [con.laddr.port for con in psutil.net_connections() if con.status == psutil.CONN_LISTEN and con.pid == pid] #type: ignore
+    pid = [p.info for p in psutil.process_iter(attrs=['pid', 'name']) if 'Pscad.exe' in p.info['name']][0]['pid']
+    ports = [con.laddr.port for con in psutil.net_connections() if con.status == psutil.CONN_LISTEN and con.pid == pid]
 
     if len(ports) == 0: #type: ignore
         print('No PSCAD listening ports found!\n')
