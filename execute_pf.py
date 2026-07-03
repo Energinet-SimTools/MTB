@@ -163,7 +163,8 @@ def setupResFiles(app : pf.Application, script : pf.ComPython, root : pf.DataObj
       'mtb_s_qudroop.ElmDsl',
       'mtb_s_pavail_pu.ElmDsl',
       'mtb_s_mtrfrgnd.ElmDsl',
-      'mtb_s_sips.ElmDsl',
+      'mtb_s_sips_g.ElmDsl',
+      'mtb_s_sips_d.ElmDsl',
       'mtb_s_qref_3.ElmDsl',
       'mtb_s_qref_4.ElmDsl',
       'mtb_s_qref_5.ElmDsl',
@@ -185,17 +186,29 @@ def setupResFiles(app : pf.Application, script : pf.ComPython, root : pf.DataObj
     assert signalObj is not None
     elmRes.AddVariable(signalObj, 's:yo')
     
-  SIPSObj = root.SearchObject('mtb_sips_decoder.ElmDsl')
-  assert SIPSObj is not None
-  elmRes.AddVariable(SIPSObj, 's:mtb_s_sips')
-  elmRes.AddVariable(SIPSObj, 's:sips_arm')
-  elmRes.AddVariable(SIPSObj, 's:sips_step_1')
-  elmRes.AddVariable(SIPSObj, 's:sips_step_2')
-  elmRes.AddVariable(SIPSObj, 's:sips_step_3')
-  elmRes.AddVariable(SIPSObj, 's:sips_step_4')
-  elmRes.AddVariable(SIPSObj, 's:sips_step_5')
-  elmRes.AddVariable(SIPSObj, 's:sips_step_6')
-  elmRes.AddVariable(SIPSObj, 's:sips_step_7')
+  SIPSgObj = root.SearchObject('mtb_sips_decoder_g.ElmDsl')
+  assert SIPSgObj is not None
+  elmRes.AddVariable(SIPSgObj, 's:mtb_s_sips')
+  #elmRes.AddVariable(SIPSgObj, 's:sips_arm') #sips_arm is not used in the current version of the MTB
+  elmRes.AddVariable(SIPSgObj, 's:sips_step_1')
+  elmRes.AddVariable(SIPSgObj, 's:sips_step_2')
+  elmRes.AddVariable(SIPSgObj, 's:sips_step_3')
+  elmRes.AddVariable(SIPSgObj, 's:sips_step_4')
+  elmRes.AddVariable(SIPSgObj, 's:sips_step_5')
+  elmRes.AddVariable(SIPSgObj, 's:sips_step_6')
+  elmRes.AddVariable(SIPSgObj, 's:sips_step_7')
+
+  SIPSdObj = root.SearchObject('mtb_sips_decoder_d.ElmDsl')
+  assert SIPSdObj is not None
+  elmRes.AddVariable(SIPSdObj, 's:mtb_s_sips')
+  #elmRes.AddVariable(SIPSdObj, 's:sips_arm') #sips_arm is not used in the current version of the MTB
+  elmRes.AddVariable(SIPSdObj, 's:sips_step_1')
+  elmRes.AddVariable(SIPSdObj, 's:sips_step_2')
+  elmRes.AddVariable(SIPSdObj, 's:sips_step_3')
+  elmRes.AddVariable(SIPSdObj, 's:sips_step_4')
+  elmRes.AddVariable(SIPSdObj, 's:sips_step_5')
+  elmRes.AddVariable(SIPSdObj, 's:sips_step_6')
+  elmRes.AddVariable(SIPSdObj, 's:sips_step_7')
 
   # Include measurement objects and set alias
   for i in range(1, 100):
