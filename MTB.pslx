@@ -23,7 +23,7 @@
     <param name="Warn" value="0" />
     <param name="Check" value="0" />
     <param name="description" value="" />
-    <param name="revisor" value="PRW, 1782810201" />
+    <param name="revisor" value="PRW, 1784634047" />
     <param name="Debug" value="0" />
     <param name="labels" value="" />
     <param name="Preprocessor" value="" />
@@ -36476,7 +36476,7 @@
     </paramlist>
   </GlobalSubstitutions>
   <definitions>
-    <Definition classid="UserCmpDefn" name="sips_decoder" build="" crc="99705813" view="false" instances="0" date="0" id="756905617" w="320" h="400" url="" group="">
+    <Definition classid="UserCmpDefn" name="sips_decoder" build="" crc="23867419" view="false" instances="0" date="0" id="756905617" w="320" h="400" url="" group="">
       <paramlist>
         <param name="Description" value="" />
       </paramlist>
@@ -36615,6 +36615,7 @@
       <script>
         <segment name="Computations" id="276043688" classid="CoreSegment"><![CDATA[]]></segment>
         <segment name="Fortran" id="1631912291" classid="CoreSegment"><![CDATA[! Extracting $N bits from an integer $I_IN into a binary output array $B_OUT($N)
+INTEGER I
 DO I = 0, $N-1
     $B_OUT(I+1) = IAND(ISHFT($I_IN, -I), 1)
 END DO]]></segment>
@@ -41463,7 +41464,7 @@ if ($type > 0) then
 endif]]></segment>
       </script>
     </Definition>
-    <Definition classid="UserCmpDefn" name="Fault" build="" crc="97364669" view="false" instances="0" date="1778493871" id="1641883939" w="320" h="400">
+    <Definition classid="UserCmpDefn" name="Fault" build="" crc="97364669" view="false" instances="0" date="1782912801" id="1641883939" w="320" h="400">
       <paramlist>
         <param name="Description" value="" />
       </paramlist>
@@ -42321,7 +42322,7 @@ endif]]></segment>
         </Wire>
       </schematic>
     </Definition>
-    <Definition classid="UserCmpDefn" name="Main" id="1339999568" group="" url="" version="" build="" crc="72126257" view="false" date="0">
+    <Definition classid="UserCmpDefn" name="Main" id="1339999568" group="" url="" version="" build="" crc="36670508" view="false" date="0">
       <paramlist name="">
         <param name="Description" value="" />
       </paramlist>
@@ -42370,7 +42371,7 @@ endif]]></segment>
         </paramlist>
         <grouping />
         <User classid="UserCmp" id="2118952145" name="MTB:MTB" x="162" y="72" w="157" h="96" z="-1" orient="0" defn="MTB:MTB" link="-1" q="4" disable="false">
-          <paramlist name="" link="-1" crc="42267070">
+          <paramlist name="" link="-1" crc="82312198">
             <param name="init_time" value="3.0" />
             <param name="RANK_MTB" value="0" />
             <param name="mode" value="1" />
@@ -42415,12 +42416,12 @@ endif]]></segment>
             <param name="out_2" value="mtb_signal_2" />
             <param name="out_3" value="mtb_signal_3" />
             <param name="out_4" value="mtb_signal_4" />
-            <param name="out_5" value="" />
-            <param name="out_6" value="" />
-            <param name="out_7" value="" />
-            <param name="out_8" value="" />
-            <param name="out_9" value="" />
-            <param name="out_10" value="" />
+            <param name="out_5" value="mtb_signal_5" />
+            <param name="out_6" value="mtb_signal_6" />
+            <param name="out_7" value="mtb_signal_7" />
+            <param name="out_8" value="mtb_signal_8" />
+            <param name="out_9" value="mtb_signal_9" />
+            <param name="out_10" value="mtb_signal_10" />
             <param name="out_fft_f_hz" value="mtb_fft_f_hz" />
             <param name="out_pmode" value="mtb_Pmode" />
             <param name="out_qref" value="mtb_Qref" />
@@ -42439,6 +42440,8 @@ endif]]></segment>
             <param name="out_pavail_pu" value="mtb_Pavail" />
             <param name="out_mtrfrgnd" value="mtb_MtrfrGnd" />
             <param name="out_sips" value="mtb_SIPS" />
+            <param name="out_sips_g" value="mtb_SIPS_g" />
+            <param name="out_sips_d" value="mtb_SIPS_d" />
           </paramlist>
           <paramlist name="" link="240461515">
             <param name="xmin" value="0.000000" />
@@ -42835,9 +42838,60 @@ It is often necessary to scale or adjust the reference signals and mode selectio
             <param name="Name" value="" />
           </paramlist>
         </User>
+        <Sticky classid="Sticky" id="1300435347" x="1026" y="414" w="540" h="126" colors="0, 15792890">
+          <paramlist>
+            <param name="full_font" value="Tahoma, 12world" />
+            <param name="align" value="0" />
+            <param name="fg_color_adv" value="#FF000000" />
+            <param name="bg_color_adv" value="#FFFAFAF0" />
+            <param name="hl_color_adv" value="#FFFFFF00" />
+            <param name="bdr_color_adv" value="#FF505050" />
+            <param name="arrows" value="0" />
+            <param name="style" value="1" />
+            <param name="font" value="1" />
+            <param name="fg_color" value="0" />
+            <param name="bg_color" value="15792890" />
+          </paramlist><![CDATA[Some of the new MTB standard cases are meant to test the "system protection" or SIPS functionality. This is done with the use of signal 1 and signal 3.
+
+Signal 3 is used when it is needed to enable the SIPS function for specific case rank and Signal 1 is the new power reference in pu.
+ 
+Signal 1 value should be modified based on PPC input.
+]]></Sticky>
+        <User classid="UserCmp" id="1440441006" name="master:datalabel" x="702" y="432" w="78" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+          <paramlist name="" link="-1" crc="127230955">
+            <param name="Name" value="mtb_signal_1" />
+          </paramlist>
+        </User>
+        <User classid="UserCmp" defn="master:gain" id="1820028208" x="774" y="432" w="80" h="36" z="690" orient="0" link="-1" q="4" disable="false">
+          <paramlist link="-1" name="" crc="34173863">
+            <param name="G" value="100" />
+            <param name="COM" value="Gain" />
+            <param name="Dim" value="1" />
+            <param name="Name" value="" />
+            <param name="DPath" value="1" />
+          </paramlist>
+        </User>
+        <Wire classid="WireOrthogonal" id="1245059550" name="" x="702" y="432" w="46" h="10" orient="0" disable="false">
+          <vertex x="0" y="0" />
+          <vertex x="36" y="0" />
+        </Wire>
+        <User classid="UserCmp" id="106759508" name="master:datalabel" x="918" y="432" w="166" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+          <paramlist name="" link="-1" crc="127230955">
+            <param name="Name" value="mtb_system_protection_Pref" />
+          </paramlist>
+        </User>
+        <Wire classid="WireOrthogonal" id="1780922836" name="" x="810" y="432" w="64" h="10" orient="0" disable="false">
+          <vertex x="0" y="0" />
+          <vertex x="54" y="0" />
+        </Wire>
         <User classid="UserCmp" id="524042420" name="master:datalabel" x="1170" y="216" w="64" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_Pavail" />
+          </paramlist>
+        </User>
+        <User classid="UserCmp" id="1183073234" name="master:datalabel" x="918" y="504" w="180" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+          <paramlist name="" link="-1" crc="127230955">
+            <param name="Name" value="mtb_system_protection_enable" />
           </paramlist>
         </User>
         <User classid="UserCmp" name="master:datalabel" defn="master:datalabel" id="2024240628" x="1404" y="216" w="134" h="23" z="1" orient="6" link="-1" q="4" disable="false">
@@ -42845,6 +42899,19 @@ It is often necessary to scale or adjust the reference signals and mode selectio
             <param name="Name" value="P_available_percentage" />
           </paramlist>
         </User>
+        <Wire classid="WireOrthogonal" id="1105185508" name="" x="864" y="432" w="64" h="10" orient="0" disable="false">
+          <vertex x="0" y="0" />
+          <vertex x="54" y="0" />
+        </Wire>
+        <User classid="UserCmp" id="831172856" name="master:datalabel" x="702" y="504" w="78" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+          <paramlist name="" link="-1" crc="127230955">
+            <param name="Name" value="mtb_signal_3" />
+          </paramlist>
+        </User>
+        <Wire classid="WireOrthogonal" id="1034696521" name="" x="702" y="504" w="226" h="10" orient="0" disable="false">
+          <vertex x="0" y="0" />
+          <vertex x="216" y="0" />
+        </Wire>
         <User classid="UserCmp" defn="master:gain" id="2104255659" x="1260" y="216" w="80" h="36" z="690" orient="0" link="-1" q="4" disable="false">
           <paramlist link="-1" name="" crc="34173863">
             <param name="G" value="100" />
@@ -42876,7 +42943,7 @@ It is often necessary to scale or adjust the reference signals and mode selectio
           <vertex x="0" y="0" />
           <vertex x="234" y="0" />
         </Wire>
-        <User classid="UserCmp" defn="master:xfmr-3p2w" id="2057875064" x="1170" y="612" w="98" h="64" z="1240" orient="4" link="-1" q="4" disable="false">
+        <User classid="UserCmp" defn="master:xfmr-3p2w" id="2057875064" x="1080" y="612" w="98" h="64" z="1240" orient="4" link="-1" q="4" disable="false">
           <paramlist link="-1" name="" crc="86463138">
             <param name="Name" value="HV_ATA01_80/45/45 MVA 132/20/20 kV" />
             <param name="Tmva" value="80.0 [MVA]" />
@@ -42954,28 +43021,28 @@ It is often necessary to scale or adjust the reference signals and mode selectio
             <param name="BCA1" value="" />
           </paramlist>
         </User>
-        <User classid="UserCmp" name="datalabel" defn="master:datalabel" id="1537879007" x="1224" y="594" w="38" h="23" z="1" orient="0" link="-1" q="4" disable="false">
+        <User classid="UserCmp" name="datalabel" defn="master:datalabel" id="1537879007" x="1134" y="594" w="38" h="23" z="1" orient="0" link="-1" q="4" disable="false">
           <paramlist link="-1" name="" crc="127230955">
             <param name="Name" value="T_tap" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1928340998" name="" x="1224" y="612" w="82" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1928340998" name="" x="1134" y="612" w="82" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="72" y="0" />
         </Wire>
-        <User classid="UserCmp" name="master:ground" defn="master:ground" id="1945913795" x="1188" y="756" w="26" h="34" z="0" orient="1" link="-1" q="4" disable="false">
+        <User classid="UserCmp" name="master:ground" defn="master:ground" id="1945913795" x="1098" y="756" w="26" h="34" z="0" orient="1" link="-1" q="4" disable="false">
           <paramlist link="-1" name="" crc="28206164" />
         </User>
-        <Wire classid="WireOrthogonal" id="2110235161" name="" x="1188" y="756" w="10" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="2110235161" name="" x="1098" y="756" w="10" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="0" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="2127848445" name="master:datalabel" x="1170" y="900" w="82" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="2127848445" name="master:datalabel" x="1080" y="900" w="82" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_MtrfrGnd" />
           </paramlist>
         </User>
-        <User classid="UserCmp" defn="master:select" id="216877820" x="1260" y="846" w="82" h="90" z="1180" orient="0" link="-1" q="4" disable="false">
+        <User classid="UserCmp" defn="master:select" id="216877820" x="1170" y="846" w="82" h="90" z="1180" orient="0" link="-1" q="4" disable="false">
           <paramlist link="-1" name="" crc="108938206">
             <param name="A" value="0" />
             <param name="DPath" value="1" />
@@ -42984,35 +43051,35 @@ It is often necessary to scale or adjust the reference signals and mode selectio
             <param name="Name" value="" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1888781660" name="" x="1170" y="900" w="100" h="28" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1888781660" name="" x="1080" y="900" w="100" h="28" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="90" y="0" />
           <vertex x="90" y="-18" />
         </Wire>
-        <User classid="UserCmp" id="346096805" name="master:const" x="1188" y="810" w="76" h="22" z="590" orient="0" defn="master:const" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="346096805" name="master:const" x="1098" y="810" w="76" h="22" z="590" orient="0" defn="master:const" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="10628662">
             <param name="Name" value="" />
             <param name="Value" value="1" />
             <param name="Dim" value="1" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="637422830" name="master:const" x="1188" y="846" w="76" h="22" z="630" orient="0" defn="master:const" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="637422830" name="master:const" x="1098" y="846" w="76" h="22" z="630" orient="0" defn="master:const" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="10628662">
             <param name="Name" value="" />
             <param name="Value" value="0" />
             <param name="Dim" value="1" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="550274073" name="master:datalabel" x="1350" y="846" w="82" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="550274073" name="master:datalabel" x="1260" y="846" w="82" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="MtrfrGnd_BRK" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="529034320" name="" x="1296" y="846" w="64" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="529034320" name="" x="1206" y="846" w="64" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="54" y="0" />
         </Wire>
-        <User classid="UserCmp" defn="master:breaker1" id="784754256" x="1188" y="684" w="31" h="108" z="1210" orient="1" link="-1" q="4" disable="false">
+        <User classid="UserCmp" defn="master:breaker1" id="784754256" x="1098" y="684" w="31" h="108" z="1210" orient="1" link="-1" q="4" disable="false">
           <paramlist link="-1" name="" crc="72396467">
             <param name="NAME" value="MtrfrGnd_BRK" />
             <param name="OPCUR" value="0" />
@@ -43032,7 +43099,7 @@ It is often necessary to scale or adjust the reference signals and mode selectio
             <param name="BOpen" value="0" />
           </paramlist>
         </User>
-        <Sticky classid="Sticky" id="1614561085" x="1296" y="648" w="270" h="108" colors="0, 15792890">
+        <Sticky classid="Sticky" id="1614561085" x="1206" y="648" w="270" h="108" colors="0, 15792890">
           <paramlist>
             <param name="full_font" value="Tahoma, 12world" />
             <param name="align" value="0" />
@@ -43053,7 +43120,7 @@ else:
 	Grounding Breaker will be ON (closed)]]></Sticky>
         <User classid="UserCmp" id="169360811" name="MTB:sips_decoder" x="234" y="1026" w="278" h="83" z="-1" orient="0" defn="MTB:sips_decoder" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="112124752">
-            <param name="Name" value="MTB_SIPS_Decoder" />
+            <param name="Name" value="MTB_SIPS_Generic_Decoder" />
             <param name="N" value="8" />
           </paramlist>
         </User>
@@ -43122,29 +43189,29 @@ else:
             <param name="Name" value="SIPS_future_use" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="2106694942" name="master:datalabel" x="432" y="1098" w="23" h="78" z="1" orient="3" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="2106694942" name="master:datalabel" x="432" y="1098" w="23" h="90" z="1" orient="3" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
-            <param name="Name" value="SIPS_Step_1" />
+            <param name="Name" value="SIPS_g_step_1" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1508450368" name="master:datalabel" x="450" y="1098" w="23" h="78" z="1" orient="3" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1508450368" name="master:datalabel" x="450" y="1098" w="23" h="90" z="1" orient="3" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
-            <param name="Name" value="SIPS_Step_2" />
+            <param name="Name" value="SIPS_g_step_2" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1599014224" name="master:datalabel" x="468" y="1098" w="23" h="78" z="1" orient="3" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1599014224" name="master:datalabel" x="468" y="1098" w="23" h="90" z="1" orient="3" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
-            <param name="Name" value="SIPS_Step_3" />
+            <param name="Name" value="SIPS_g_step_3" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1708725272" name="master:datalabel" x="486" y="1098" w="23" h="78" z="1" orient="3" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1708725272" name="master:datalabel" x="486" y="1098" w="23" h="90" z="1" orient="3" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
-            <param name="Name" value="SIPS_Step_4" />
+            <param name="Name" value="SIPS_g_step_4" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="428430117" name="master:datalabel" x="504" y="1098" w="23" h="78" z="1" orient="3" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="428430117" name="master:datalabel" x="504" y="1098" w="23" h="90" z="1" orient="3" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
-            <param name="Name" value="SIPS_Step_5" />
+            <param name="Name" value="SIPS_g_step_5" />
           </paramlist>
         </User>
         <Wire classid="WireOrthogonal" id="788578453" name="" x="414" y="1044" w="10" h="64" orient="0" disable="false">
@@ -43175,7 +43242,7 @@ else:
           <vertex x="0" y="0" />
           <vertex x="180" y="0" />
         </Wire>
-        <Sticky classid="Sticky" id="1851091788" x="540" y="900" w="558" h="306" colors="0, 15792890">
+        <Sticky classid="Sticky" id="1851091788" x="558" y="936" w="558" h="270" colors="0, 15792890">
           <paramlist>
             <param name="full_font" value="Tahoma, 12world" />
             <param name="align" value="0" />
@@ -43188,8 +43255,7 @@ else:
             <param name="font" value="1" />
             <param name="fg_color" value="0" />
             <param name="bg_color" value="15792890" />
-          </paramlist><![CDATA[This new mtb_SIPS signal is used for the newest default testcases.xlsx.Otherwise the custom signals can be used, but this needs changing in the default testcases.xlsx
-This MTB SIPS Decoder should be used to decode the 'MTB SIPS signal' from a real value into distinct boolean outputs as required by the grid codes for a plant's SIPS interface. The example below shows how the decoder will convert the 'MTB SIPS signal' into a six bit output output array
+          </paramlist><![CDATA[This MTB SIPS Decoder should be used to decode the 'MTB SIPS Generation signal' or the "MTB SIPS Demand signal" from a real value into distinct boolean outputs as required by the grid codes for a plant's SIPS interface. The example below shows how the decoder will convert the 'MTB SIPS Generation signal' into a six bit output output array. 
 
 I_IN	B_OUT(6)	B_OUT(5)	B_OUT(4)	B_OUT(3)	B_OUT(2)	B_OUT(1)
 ===	======	======	======	======	======	======
@@ -43201,9 +43267,9 @@ I_IN	B_OUT(6)	B_OUT(5)	B_OUT(4)	B_OUT(3)	B_OUT(2)	B_OUT(1)
 17	0	1	0	0	0	1
 33	1	0	0	0	0	1
 
-B_OUT(1) = SIPS_future_use
-B_OUT(2) = SIPS_Step_1
-B_OUT(3) = SIPS_Step_2, etc.]]></Sticky>
+B_OUT(1) = SIPS_future_use (e.g. Enable / Disable, etc.)
+B_OUT(2) = SIPS_g_step_1
+B_OUT(3) = SIPS_g_step_2, etc.]]></Sticky>
         <User classid="UserCmp" defn="master:unity" id="910164126" x="108" y="1026" w="44" h="21" z="830" orient="0" link="-1" q="4" disable="false">
           <paramlist link="-1" name="" crc="65785874">
             <param name="IType" value="2" />
@@ -43221,14 +43287,33 @@ B_OUT(3) = SIPS_Step_2, etc.]]></Sticky>
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <User classid="UserCmp" defn="master:datalabel" id="2123380635" x="36" y="1026" w="60" h="23" z="0" orient="4" link="-1" q="4" disable="false">
+        <User classid="UserCmp" defn="master:datalabel" id="2123380635" x="36" y="1026" w="74" h="23" z="0" orient="4" link="-1" q="4" disable="false">
           <paramlist link="-1" name="" crc="127230955">
-            <param name="Name" value="mtb_SIPS" />
+            <param name="Name" value="mtb_SIPS_g" />
           </paramlist>
         </User>
+        <Sticky classid="Sticky" id="770731171" x="126" y="1080" w="234" h="126" colors="0, 15792890">
+          <paramlist>
+            <param name="full_font" value="Tahoma, 12world" />
+            <param name="align" value="0" />
+            <param name="fg_color_adv" value="#FF000000" />
+            <param name="bg_color_adv" value="#FFFAFAF0" />
+            <param name="hl_color_adv" value="#FFFFFF00" />
+            <param name="bdr_color_adv" value="#FF505050" />
+            <param name="arrows" value="0" />
+            <param name="style" value="1" />
+            <param name="font" value="1" />
+            <param name="fg_color" value="0" />
+            <param name="bg_color" value="15792890" />
+          </paramlist><![CDATA[When using more than one sips_decoder blocks, e.g. one for Generation and one for Demand, always use,
+
+ "Paste Special" > "Paste Transfer"
+
+to create two seperate instances of the sips_decoder block.
+]]></Sticky>
       </schematic>
     </Definition>
-    <Definition classid="UserCmpDefn" name="ThreePhaseCtrl" build="" crc="111378194" view="false" instances="0" date="1778493871" id="1238595495" w="320" h="400">
+    <Definition classid="UserCmpDefn" name="ThreePhaseCtrl" build="" crc="111378194" view="false" instances="0" date="1782912801" id="1238595495" w="320" h="400">
       <paramlist>
         <param name="Description" value="" />
       </paramlist>
@@ -44324,7 +44409,7 @@ $out = mtb_return_value
 #ENDIF]]></segment>
       </script>
     </Definition>
-    <Definition classid="UserCmpDefn" name="MTB" build="" crc="36282851" view="false" instances="0" date="1778493871" id="274789173" w="320" h="400" url="" group="">
+    <Definition classid="UserCmpDefn" name="MTB" build="" crc="95941236" view="false" instances="0" date="1782912801" id="274789173" w="320" h="400" url="" group="">
       <paramlist>
         <param name="Description" value="" />
       </paramlist>
@@ -44556,7 +44641,13 @@ $out = mtb_return_value
             <vis><![CDATA[true]]></vis>
             <help><![CDATA[]]></help>
           </parameter>
-          <parameter name="out_sips" desc="MTB SIPS signal" type="Real" group="" helpmode="Append" content_type="Variable" intent="Output" dim="1" animate="false" unit="" min="0" max="8589934591">
+          <parameter name="out_sips_g" desc="MTB SIPS Generation signal" type="Real" group="" helpmode="Append" content_type="Variable" intent="Output" dim="1" animate="false" unit="" min="0" max="8589934591">
+            <value><![CDATA[]]></value>
+            <cond><![CDATA[true]]></cond>
+            <vis><![CDATA[true]]></vis>
+            <help><![CDATA[]]></help>
+          </parameter>
+          <parameter name="out_sips_d" desc="MTB SIPS Demand signal" type="Real" group="" helpmode="Append" content_type="Variable" intent="Output" dim="1" animate="false" unit="" min="0" max="8589934591">
             <value><![CDATA[]]></value>
             <cond><![CDATA[true]]></cond>
             <vis><![CDATA[true]]></vis>
@@ -45369,7 +45460,7 @@ $out = mtb_return_value
             <param name="weight" value="2" />
           </paramlist>
         </Line>
-        <User classid="UserCmp" id="1358974503" name="master:export" x="2268" y="792" w="94" h="24" z="470" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1358974503" name="master:export" x="2268" y="774" w="94" h="24" z="470" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_rank" />
           </paramlist>
@@ -45611,7 +45702,7 @@ $out = mtb_return_value
         <User classid="UserCmp" name="master:rank_number" id="1823972439" x="2016" y="522" w="75" h="21" z="310" orient="0" defn="master:rank_number" link="-1" layer="" q="4" disable="false">
           <paramlist link="-1" name="" crc="119362076" />
         </User>
-        <User classid="UserCmp" id="1752432171" name="MTB:MTBsignal" x="1692" y="792" w="127" h="62" z="440" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1752432171" name="MTB:MTBsignal" x="1692" y="774" w="127" h="62" z="440" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -45621,7 +45712,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="31145197" name="MTB:MTBsignal" x="1728" y="1566" w="127" h="62" z="980" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="31145197" name="MTB:MTBsignal" x="1728" y="1548" w="127" h="62" z="980" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -45631,22 +45722,22 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1686728035" name="master:export" x="1836" y="792" w="114" h="24" z="450" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1686728035" name="master:export" x="1836" y="774" w="114" h="24" z="450" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_pref_pu" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1548589087" name="master:export" x="1872" y="1566" w="93" h="24" z="1000" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1548589087" name="master:export" x="1872" y="1548" w="93" h="24" z="1000" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_qref" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="2017615420" name="master:export" x="1836" y="1476" w="109" h="24" z="930" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="2017615420" name="master:export" x="1836" y="1458" w="109" h="24" z="930" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_qmode" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="2021149522" name="master:export" x="2052" y="882" w="109" h="24" z="530" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="2021149522" name="master:export" x="2052" y="864" w="109" h="24" z="530" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_pmode" />
           </paramlist>
@@ -47237,32 +47328,32 @@ $out = mtb_return_value
             <param name="Name" value="" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="930181897" name="master:datalabel" x="2160" y="792" w="58" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="930181897" name="master:datalabel" x="2160" y="774" w="58" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="322728775" name="master:export" x="2250" y="1296" w="113" h="24" z="2950" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="322728775" name="master:export" x="2250" y="1278" w="113" h="24" z="2950" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_rg_ohm" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1446616274" name="master:export" x="2250" y="1332" w="99" h="24" z="2930" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1446616274" name="master:export" x="2250" y="1314" w="99" h="24" z="2930" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_Lg_H" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1316119593" name="master:export" x="1926" y="1296" w="113" h="24" z="2960" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1316119593" name="master:export" x="1926" y="1278" w="113" h="24" z="2960" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_r0_ohm" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1178084343" name="master:export" x="1926" y="1332" w="99" h="24" z="2940" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1178084343" name="master:export" x="1926" y="1314" w="99" h="24" z="2940" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_L0_H" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="421181105" name="master:datalabel" x="2160" y="1296" w="72" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="421181105" name="master:datalabel" x="2160" y="1278" w="72" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="vsc_rg_ohm" />
           </paramlist>
@@ -47322,22 +47413,22 @@ $out = mtb_return_value
           <vertex x="0" y="0" />
           <vertex x="54" y="0" />
         </Wire>
-        <User classid="UserCmp" id="412886137" name="master:datalabel" x="1782" y="1368" w="104" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="412886137" name="master:datalabel" x="1782" y="1350" w="104" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="vsc_rms_varef_pu" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="378509092" name="master:datalabel" x="2160" y="1332" w="52" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="378509092" name="master:datalabel" x="2160" y="1314" w="52" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="vsc_lg_h" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="196729487" name="master:export" x="1926" y="1368" w="145" h="24" z="2920" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="196729487" name="master:export" x="1926" y="1350" w="145" h="24" z="2920" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_rms_varef_pu" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="298060383" name="master:datalabel" x="1782" y="1296" w="88" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="298060383" name="master:datalabel" x="1782" y="1278" w="88" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_t_r0_ohm" />
           </paramlist>
@@ -47347,12 +47438,12 @@ $out = mtb_return_value
             <param name="Name" value="vsc_L0_H" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1589258030" name="master:datalabel" x="1782" y="1332" w="58" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1589258030" name="master:datalabel" x="1782" y="1314" w="58" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="vsc_L0_H" />
           </paramlist>
         </User>
-        <User classid="UserCmp" defn="master:gain" id="654716568" x="1854" y="1296" w="80" h="36" z="1820" orient="0" link="-1" q="4" disable="false">
+        <User classid="UserCmp" defn="master:gain" id="654716568" x="1854" y="1278" w="80" h="36" z="1820" orient="0" link="-1" q="4" disable="false">
           <paramlist link="-1" name="" crc="34173863">
             <param name="G" value="1" />
             <param name="COM" value="Gain" />
@@ -47537,7 +47628,7 @@ $out = mtb_return_value
             </Curve>
           </Graph>
         </Frame>
-        <User classid="UserCmp" id="1243174260" name="MTB:MTBsignal" x="1692" y="972" w="127" h="62" z="570" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1243174260" name="MTB:MTBsignal" x="1692" y="954" w="127" h="62" z="570" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -47547,7 +47638,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1152389906" name="MTB:MTBsignal" x="1944" y="972" w="127" h="62" z="600" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1152389906" name="MTB:MTBsignal" x="1944" y="954" w="127" h="62" z="600" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -47557,7 +47648,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1879245782" name="MTB:MTBsignal" x="2178" y="972" w="127" h="62" z="680" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1879245782" name="MTB:MTBsignal" x="2178" y="954" w="127" h="62" z="680" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -47567,7 +47658,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1050057608" name="MTB:MTBsignal" x="1692" y="1062" w="127" h="62" z="730" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1050057608" name="MTB:MTBsignal" x="1692" y="1044" w="127" h="62" z="730" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -47577,7 +47668,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1941050904" name="MTB:MTBsignal" x="1944" y="1062" w="127" h="62" z="770" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1941050904" name="MTB:MTBsignal" x="1944" y="1044" w="127" h="62" z="770" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -47587,7 +47678,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="420430181" name="MTB:MTBsignal" x="2178" y="1062" w="127" h="62" z="810" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="420430181" name="MTB:MTBsignal" x="2178" y="1044" w="127" h="62" z="810" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -47597,7 +47688,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1230581215" name="MTB:MTBsignal" x="1692" y="1152" w="127" h="62" z="830" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1230581215" name="MTB:MTBsignal" x="1692" y="1134" w="127" h="62" z="830" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -47607,7 +47698,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="296325175" name="MTB:MTBsignal" x="1944" y="1152" w="127" h="62" z="850" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="296325175" name="MTB:MTBsignal" x="1944" y="1134" w="127" h="62" z="850" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -47617,7 +47708,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1575252326" name="MTB:MTBsignal" x="2178" y="1152" w="127" h="62" z="870" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1575252326" name="MTB:MTBsignal" x="2178" y="1134" w="127" h="62" z="870" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -47627,7 +47718,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="535149545" name="MTB:MTBsignal" x="2178" y="882" w="127" h="62" z="550" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="535149545" name="MTB:MTBsignal" x="2178" y="864" w="127" h="62" z="550" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -47637,65 +47728,65 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1148160540" name="" x="2160" y="792" w="82" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1148160540" name="" x="2160" y="774" w="82" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="72" y="0" />
         </Wire>
-        <User classid="UserCmp" id="993281332" name="master:export" x="2322" y="882" w="78" h="24" z="560" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="993281332" name="master:export" x="2322" y="864" w="78" h="24" z="560" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_1" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="702065542" name="master:export" x="1836" y="972" w="78" h="24" z="590" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="702065542" name="master:export" x="1836" y="954" w="78" h="24" z="590" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_2" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="40110023" name="master:export" x="2088" y="972" w="78" h="24" z="640" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="40110023" name="master:export" x="2088" y="954" w="78" h="24" z="640" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_3" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="464730387" name="master:export" x="2322" y="972" w="78" h="24" z="700" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="464730387" name="master:export" x="2322" y="954" w="78" h="24" z="700" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_4" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1752037067" name="master:export" x="1836" y="1062" w="78" h="24" z="760" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1752037067" name="master:export" x="1836" y="1044" w="78" h="24" z="760" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_5" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="200904569" name="master:export" x="2088" y="1062" w="78" h="24" z="800" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="200904569" name="master:export" x="2088" y="1044" w="78" h="24" z="800" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_6" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1039678120" name="master:export" x="2322" y="1062" w="78" h="24" z="820" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1039678120" name="master:export" x="2322" y="1044" w="78" h="24" z="820" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_7" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1486306297" name="master:export" x="1800" y="1152" w="78" h="24" z="840" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1486306297" name="master:export" x="1800" y="1134" w="78" h="24" z="840" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_8" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1978466338" name="master:export" x="2088" y="1152" w="78" h="24" z="860" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1978466338" name="master:export" x="2088" y="1134" w="78" h="24" z="860" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_9" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="878604053" name="master:export" x="2322" y="1152" w="85" h="24" z="880" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="878604053" name="master:export" x="2322" y="1134" w="85" h="24" z="880" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_10" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1865227038" name="" x="1782" y="1296" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1865227038" name="" x="1782" y="1278" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <User classid="UserCmp" id="980747585" name="master:pgb" x="2286" y="918" w="65" h="40" z="580" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="980747585" name="master:pgb" x="2286" y="900" w="65" h="40" z="580" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_1" />
             <param name="Group" value="" />
@@ -47710,21 +47801,21 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1438803680" name="master:datalabel" x="2250" y="882" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1438803680" name="master:datalabel" x="2250" y="864" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_1" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1797017826" name="" x="2286" y="918" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1797017826" name="" x="2286" y="900" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="1379966689" name="" x="2250" y="882" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1379966689" name="" x="2250" y="864" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <User classid="UserCmp" id="1932405019" name="MTB:MTBsignal" x="1728" y="1476" w="127" h="62" z="920" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1932405019" name="MTB:MTBsignal" x="1728" y="1458" w="127" h="62" z="920" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -47734,7 +47825,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="587938204" name="MTB:MTBsignal" x="1944" y="882" w="127" h="62" z="520" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="587938204" name="MTB:MTBsignal" x="1944" y="864" w="127" h="62" z="520" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -47774,7 +47865,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="875296083" name="MTB:MTBsignal" x="1800" y="504" w="136" h="62" z="1620" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="875296083" name="MTB:MTBsignal" x="1818" y="522" w="136" h="62" z="1620" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -47784,21 +47875,21 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="62271034" name="" x="1764" y="972" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="62271034" name="" x="1764" y="954" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <User classid="UserCmp" id="1473382603" name="master:datalabel" x="1764" y="972" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1473382603" name="master:datalabel" x="1764" y="954" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_2" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="63932712" name="" x="1800" y="1008" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="63932712" name="" x="1800" y="990" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="28392271" name="master:pgb" x="1800" y="1008" w="65" h="40" z="660" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="28392271" name="master:pgb" x="1800" y="990" w="65" h="40" z="660" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_2" />
             <param name="Group" value="" />
@@ -47813,21 +47904,21 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="423724302" name="" x="2016" y="972" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="423724302" name="" x="2016" y="954" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <User classid="UserCmp" id="237895309" name="master:datalabel" x="2016" y="972" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="237895309" name="master:datalabel" x="2016" y="954" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_3" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1133554042" name="" x="2052" y="1008" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1133554042" name="" x="2052" y="990" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="980282820" name="master:pgb" x="2052" y="1008" w="65" h="40" z="710" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="980282820" name="master:pgb" x="2052" y="990" w="65" h="40" z="710" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_3" />
             <param name="Group" value="" />
@@ -47842,7 +47933,7 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="445464643" name="master:pgb" x="2286" y="1008" w="65" h="40" z="750" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="445464643" name="master:pgb" x="2286" y="990" w="65" h="40" z="750" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_4" />
             <param name="Group" value="" />
@@ -47857,31 +47948,31 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="659693363" name="" x="2286" y="1008" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="659693363" name="" x="2286" y="990" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="1373349423" name="master:datalabel" x="2250" y="972" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1373349423" name="master:datalabel" x="2250" y="954" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_4" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1491576866" name="" x="2250" y="972" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1491576866" name="" x="2250" y="954" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <User classid="UserCmp" id="147784243" name="master:datalabel" x="1764" y="1062" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="147784243" name="master:datalabel" x="1764" y="1044" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_5" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="986279237" name="" x="1800" y="1098" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="986279237" name="" x="1800" y="1080" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="251626223" name="master:pgb" x="1800" y="1098" w="65" h="40" z="780" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
+        <User classid="UserCmp" id="251626223" name="master:pgb" x="1800" y="1080" w="65" h="40" z="780" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_5" />
             <param name="Group" value="" />
@@ -47896,21 +47987,21 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="819705420" name="" x="1764" y="1062" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="819705420" name="" x="1764" y="1044" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="526139176" name="" x="2052" y="1098" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="526139176" name="" x="2052" y="1080" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="138548644" name="master:datalabel" x="2016" y="1062" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="138548644" name="master:datalabel" x="2016" y="1044" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_6" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="663642527" name="master:pgb" x="2052" y="1098" w="65" h="40" z="840" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
+        <User classid="UserCmp" id="663642527" name="master:pgb" x="2052" y="1080" w="65" h="40" z="840" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_6" />
             <param name="Group" value="" />
@@ -47925,21 +48016,21 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1295348749" name="" x="2016" y="1062" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1295348749" name="" x="2016" y="1044" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="1190010717" name="" x="2286" y="1098" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1190010717" name="" x="2286" y="1080" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="1126656569" name="master:datalabel" x="2250" y="1062" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1126656569" name="master:datalabel" x="2250" y="1044" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_7" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="750937452" name="master:pgb" x="2286" y="1098" w="65" h="40" z="860" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
+        <User classid="UserCmp" id="750937452" name="master:pgb" x="2286" y="1080" w="65" h="40" z="860" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_7" />
             <param name="Group" value="" />
@@ -47954,21 +48045,21 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="827444588" name="" x="2250" y="1062" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="827444588" name="" x="2250" y="1044" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="328913930" name="" x="1800" y="1188" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="328913930" name="" x="1800" y="1170" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="1261371715" name="master:datalabel" x="1764" y="1152" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1261371715" name="master:datalabel" x="1764" y="1134" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_8" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="599498094" name="master:pgb" x="1800" y="1188" w="65" h="40" z="900" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
+        <User classid="UserCmp" id="599498094" name="master:pgb" x="1800" y="1170" w="65" h="40" z="900" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_8" />
             <param name="Group" value="" />
@@ -47983,17 +48074,17 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="33770511" name="" x="2052" y="1188" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="33770511" name="" x="2052" y="1170" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="535681297" name="master:datalabel" x="2016" y="1152" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="535681297" name="master:datalabel" x="2016" y="1134" w="54" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_9" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="521589299" name="master:pgb" x="2052" y="1188" w="65" h="40" z="940" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
+        <User classid="UserCmp" id="521589299" name="master:pgb" x="2052" y="1170" w="65" h="40" z="940" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_9" />
             <param name="Group" value="" />
@@ -48008,17 +48099,17 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1385422620" name="" x="2286" y="1188" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1385422620" name="" x="2286" y="1170" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="7223201" name="master:datalabel" x="2250" y="1152" w="60" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="7223201" name="master:datalabel" x="2250" y="1134" w="60" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_10" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1078640644" name="master:pgb" x="2286" y="1188" w="72" h="40" z="950" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
+        <User classid="UserCmp" id="1078640644" name="master:pgb" x="2286" y="1170" w="72" h="40" z="950" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_10" />
             <param name="Group" value="" />
@@ -48033,17 +48124,17 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1230704194" name="" x="1800" y="828" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1230704194" name="" x="1800" y="810" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="213962071" name="master:datalabel" x="1764" y="792" w="90" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="213962071" name="master:datalabel" x="1764" y="774" w="90" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_pref_pu" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1729604179" name="master:pgb" x="1800" y="828" w="101" h="40" z="460" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1729604179" name="master:pgb" x="1800" y="810" w="101" h="40" z="460" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_pref_pu" />
             <param name="Group" value="" />
@@ -48058,17 +48149,17 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="685499334" name="" x="1836" y="1602" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="685499334" name="" x="1836" y="1584" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="867105096" name="master:datalabel" x="1800" y="1566" w="68" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="867105096" name="master:datalabel" x="1800" y="1548" w="68" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_qref" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1843217752" name="master:pgb" x="1836" y="1602" w="80" h="40" z="1030" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1843217752" name="master:pgb" x="1836" y="1584" w="80" h="40" z="1030" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_qref" />
             <param name="Group" value="" />
@@ -48083,19 +48174,19 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="2043204945" name="" x="2016" y="1152" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="2043204945" name="" x="2016" y="1134" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="1126012509" name="" x="2250" y="1152" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1126012509" name="" x="2250" y="1134" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="763998484" name="" x="1764" y="792" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="763998484" name="" x="1764" y="774" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="385813385" name="" x="1800" y="1566" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="385813385" name="" x="1800" y="1548" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
@@ -49236,17 +49327,17 @@ $out = mtb_return_value
             </Curve>
           </Graph>
         </Frame>
-        <User classid="UserCmp" id="1444946894" name="master:datalabel" x="2088" y="1368" w="60" h="23" z="1" orient="2" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1444946894" name="master:datalabel" x="2088" y="1350" w="60" h="23" z="1" orient="2" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="fft_s_f_hz" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="399619114" name="master:export" x="2250" y="1368" w="114" h="24" z="2910" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="399619114" name="master:export" x="2250" y="1350" w="114" h="24" z="2910" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_fft_f_hz" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="255446139" name="MTB:MTBsignal" x="2052" y="1566" w="129" h="62" z="1010" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="255446139" name="MTB:MTBsignal" x="2052" y="1548" w="129" h="62" z="1010" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -49256,22 +49347,22 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1719191724" name="master:export" x="2196" y="1566" w="128" h="24" z="1020" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1719191724" name="master:export" x="2196" y="1548" w="128" h="24" z="1020" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_qref_q_pu" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1483551829" name="" x="2160" y="1602" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1483551829" name="" x="2160" y="1584" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="718548603" name="master:datalabel" x="2124" y="1566" w="104" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="718548603" name="master:datalabel" x="2124" y="1548" w="104" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_qref_q_pu" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="337512618" name="master:pgb" x="2160" y="1602" w="115" h="40" z="820" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
+        <User classid="UserCmp" id="337512618" name="master:pgb" x="2160" y="1584" w="115" h="40" z="820" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_qref_q_pu" />
             <param name="Group" value="" />
@@ -49286,11 +49377,11 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="167521746" name="" x="2124" y="1566" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="167521746" name="" x="2124" y="1548" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <User classid="UserCmp" id="853034557" name="MTB:MTBsignal" x="1728" y="1656" w="132" h="62" z="1040" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="853034557" name="MTB:MTBsignal" x="1728" y="1638" w="132" h="62" z="1040" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -49300,22 +49391,22 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1706628479" name="master:export" x="1872" y="1656" w="135" h="24" z="1050" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1706628479" name="master:export" x="1872" y="1638" w="135" h="24" z="1050" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_qref_qu_pu" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="730711678" name="" x="1836" y="1692" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="730711678" name="" x="1836" y="1674" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="1804236536" name="master:datalabel" x="1800" y="1656" w="110" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1804236536" name="master:datalabel" x="1800" y="1638" w="110" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_qref_qu_pu" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1851294378" name="master:pgb" x="1836" y="1692" w="122" h="40" z="860" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
+        <User classid="UserCmp" id="1851294378" name="master:pgb" x="1836" y="1674" w="122" h="40" z="860" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_qref_qu_pu" />
             <param name="Group" value="" />
@@ -49330,11 +49421,11 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1656360919" name="" x="1800" y="1656" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1656360919" name="" x="1800" y="1638" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <User classid="UserCmp" id="1942741123" name="MTB:MTBsignal" x="2052" y="1656" w="127" h="62" z="1060" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1942741123" name="MTB:MTBsignal" x="2052" y="1638" w="127" h="62" z="1060" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -49344,22 +49435,22 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1053777329" name="master:export" x="2196" y="1656" w="111" h="24" z="1070" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1053777329" name="master:export" x="2196" y="1638" w="111" h="24" z="1070" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_qref_pf" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1287081455" name="" x="2160" y="1692" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1287081455" name="" x="2160" y="1674" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="2024505460" name="master:datalabel" x="2124" y="1656" w="86" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="2024505460" name="master:datalabel" x="2124" y="1638" w="86" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_qref_pf" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="400731444" name="master:pgb" x="2160" y="1692" w="98" h="40" z="880" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
+        <User classid="UserCmp" id="400731444" name="master:pgb" x="2160" y="1674" w="98" h="40" z="880" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_qref_pf" />
             <param name="Group" value="" />
@@ -49374,11 +49465,11 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="534520366" name="" x="2124" y="1656" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="534520366" name="" x="2124" y="1638" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <User classid="UserCmp" id="932044678" name="MTB:MTBsignal" x="1728" y="1746" w="127" h="62" z="1080" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="932044678" name="MTB:MTBsignal" x="1728" y="1728" w="127" h="62" z="1080" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -49388,22 +49479,22 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="2134647953" name="master:export" x="1872" y="1746" w="107" h="24" z="1090" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="2134647953" name="master:export" x="1872" y="1728" w="107" h="24" z="1090" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_qref_3" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1748825908" name="" x="1836" y="1782" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1748825908" name="" x="1836" y="1764" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="291639414" name="master:datalabel" x="1800" y="1746" w="82" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="291639414" name="master:datalabel" x="1800" y="1728" w="82" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_qref_3" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="895218974" name="master:pgb" x="1836" y="1782" w="94" h="40" z="940" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
+        <User classid="UserCmp" id="895218974" name="master:pgb" x="1836" y="1764" w="94" h="40" z="940" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_qref_3" />
             <param name="Group" value="" />
@@ -49418,11 +49509,11 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1844806946" name="" x="1800" y="1746" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1844806946" name="" x="1800" y="1728" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <User classid="UserCmp" id="23884144" name="MTB:MTBsignal" x="2052" y="1746" w="127" h="62" z="1100" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="23884144" name="MTB:MTBsignal" x="2052" y="1728" w="127" h="62" z="1100" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -49432,22 +49523,22 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="599662095" name="master:export" x="2196" y="1746" w="107" h="24" z="1110" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="599662095" name="master:export" x="2196" y="1728" w="107" h="24" z="1110" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_qref_4" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1141346935" name="" x="2160" y="1782" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1141346935" name="" x="2160" y="1764" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="428014654" name="master:datalabel" x="2124" y="1746" w="82" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="428014654" name="master:datalabel" x="2124" y="1728" w="82" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_qref_4" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="2017023277" name="master:pgb" x="2160" y="1782" w="94" h="40" z="950" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
+        <User classid="UserCmp" id="2017023277" name="master:pgb" x="2160" y="1764" w="94" h="40" z="950" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_qref_4" />
             <param name="Group" value="" />
@@ -49462,11 +49553,11 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1725878400" name="" x="2124" y="1746" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1725878400" name="" x="2124" y="1728" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <User classid="UserCmp" id="1603892642" name="MTB:MTBsignal" x="1728" y="1836" w="127" h="62" z="1140" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1603892642" name="MTB:MTBsignal" x="1728" y="1818" w="127" h="62" z="1140" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -49476,22 +49567,22 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1183915353" name="master:export" x="1872" y="1836" w="107" h="24" z="1150" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1183915353" name="master:export" x="1872" y="1818" w="107" h="24" z="1150" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_qref_5" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1950905519" name="" x="1836" y="1872" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1950905519" name="" x="1836" y="1854" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="1089127327" name="master:datalabel" x="1800" y="1836" w="82" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1089127327" name="master:datalabel" x="1800" y="1818" w="82" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_qref_5" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1371092058" name="master:pgb" x="1836" y="1872" w="94" h="40" z="1030" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
+        <User classid="UserCmp" id="1371092058" name="master:pgb" x="1836" y="1854" w="94" h="40" z="1030" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_qref_5" />
             <param name="Group" value="" />
@@ -49506,11 +49597,11 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="504007012" name="" x="1800" y="1836" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="504007012" name="" x="1800" y="1818" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <User classid="UserCmp" id="976271843" name="MTB:MTBsignal" x="2052" y="1836" w="127" h="62" z="1160" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="976271843" name="MTB:MTBsignal" x="2052" y="1818" w="127" h="62" z="1160" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -49520,22 +49611,22 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="274600334" name="master:export" x="2196" y="1836" w="107" h="24" z="1170" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="274600334" name="master:export" x="2196" y="1818" w="107" h="24" z="1170" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_qref_6" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="308453094" name="" x="2160" y="1872" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="308453094" name="" x="2160" y="1854" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="1451135748" name="master:datalabel" x="2124" y="1836" w="82" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1451135748" name="master:datalabel" x="2124" y="1818" w="82" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_qref_6" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="211930205" name="master:pgb" x="2160" y="1872" w="94" h="40" z="1060" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
+        <User classid="UserCmp" id="211930205" name="master:pgb" x="2160" y="1854" w="94" h="40" z="1060" orient="0" defn="master:pgb" link="-1" q="4" disable="true">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_qref_6" />
             <param name="Group" value="" />
@@ -49550,7 +49641,7 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="75726515" name="" x="2124" y="1836" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="75726515" name="" x="2124" y="1818" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
@@ -49705,27 +49796,27 @@ $out = mtb_return_value
             <param name="Vd" value="0.0" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1903882253" name="master:datalabel" x="1692" y="1368" w="74" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1903882253" name="master:datalabel" x="1692" y="1350" w="74" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_vth_pu" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="898431593" name="master:datalabel" x="2088" y="1296" w="76" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="898431593" name="master:datalabel" x="2088" y="1278" w="76" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_rg_ohm" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="642867464" name="master:datalabel" x="2088" y="1332" w="62" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="642867464" name="master:datalabel" x="2088" y="1314" w="62" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_Lg_H" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="543117096" name="master:datalabel" x="1692" y="1296" w="76" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="543117096" name="master:datalabel" x="1692" y="1278" w="76" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_r0_ohm" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1847652505" name="master:datalabel" x="1692" y="1332" w="62" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1847652505" name="master:datalabel" x="1692" y="1314" w="62" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_L0_H" />
           </paramlist>
@@ -50584,7 +50675,7 @@ $out = mtb_return_value
             <param name="executed" value="executed" />
           </paramlist>
         </User>
-        <User classid="UserCmp" defn="master:gain" id="132239454" x="1746" y="1296" w="80" h="36" z="2970" orient="4" link="-1" q="4" disable="false">
+        <User classid="UserCmp" defn="master:gain" id="132239454" x="1746" y="1278" w="80" h="36" z="2970" orient="4" link="-1" q="4" disable="false">
           <paramlist link="-1" name="" crc="34173863">
             <param name="G" value="1" />
             <param name="COM" value="Gain" />
@@ -50593,27 +50684,27 @@ $out = mtb_return_value
             <param name="DPath" value="1" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1714061979" name="" x="2088" y="1332" w="136" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1714061979" name="" x="2088" y="1314" w="136" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="126" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="786667520" name="" x="2088" y="1296" w="136" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="786667520" name="" x="2088" y="1278" w="136" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="126" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="1091982428" name="" x="2088" y="1368" w="136" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1091982428" name="" x="2088" y="1350" w="136" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="126" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="1896886110" name="" x="1692" y="1332" w="208" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1896886110" name="" x="1692" y="1314" w="208" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="198" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="1886074657" name="" x="1692" y="1368" w="208" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1886074657" name="" x="1692" y="1350" w="208" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="198" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="1046742690" name="" x="1692" y="1296" w="28" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1046742690" name="" x="1692" y="1278" w="28" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="18" y="0" />
         </Wire>
@@ -52937,12 +53028,12 @@ $out = mtb_return_value
             <param name="Name" value="SinAng_zero" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1604549521" name="master:export" x="2196" y="1476" w="117" h="24" z="960" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1604549521" name="master:export" x="2196" y="1458" w="117" h="24" z="960" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_qudroop" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="568865412" name="MTB:MTBsignal" x="2052" y="1476" w="127" h="62" z="940" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="568865412" name="MTB:MTBsignal" x="2052" y="1458" w="127" h="62" z="940" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -52952,7 +53043,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="42944595" name="master:pgb" x="2160" y="1512" w="104" h="40" z="970" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="42944595" name="master:pgb" x="2160" y="1494" w="104" h="40" z="970" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_qudroop" />
             <param name="Group" value="" />
@@ -52967,7 +53058,7 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="2034660001" name="MTB:MTBsignal" x="1692" y="882" w="127" h="62" z="490" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="2034660001" name="MTB:MTBsignal" x="1692" y="864" w="127" h="62" z="490" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -52977,22 +53068,22 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1308110070" name="master:export" x="1836" y="882" w="121" h="24" z="510" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1308110070" name="master:export" x="1836" y="864" w="121" h="24" z="510" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_pavail_pu" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="2065201189" name="" x="1800" y="918" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="2065201189" name="" x="1800" y="900" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="-36" y="0" />
           <vertex x="-36" y="-36" />
         </Wire>
-        <User classid="UserCmp" id="389475105" name="master:datalabel" x="1764" y="882" w="96" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="389475105" name="master:datalabel" x="1764" y="864" w="96" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_pavail_pu" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1736018573" name="master:pgb" x="1800" y="918" w="108" h="40" z="540" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1736018573" name="master:pgb" x="1800" y="900" w="108" h="40" z="540" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_pavail_pu" />
             <param name="Group" value="" />
@@ -53007,25 +53098,25 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="2088593611" name="" x="1764" y="882" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="2088593611" name="" x="1764" y="864" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <User classid="UserCmp" id="1767417409" name="master:datalabel" x="2124" y="1476" w="92" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1767417409" name="master:datalabel" x="2124" y="1458" w="92" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_qudroop" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1696931161" name="" x="2124" y="1476" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1696931161" name="" x="2124" y="1458" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="578117208" name="" x="2124" y="1476" w="46" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="578117208" name="" x="2124" y="1458" w="46" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="0" y="36" />
           <vertex x="36" y="36" />
         </Wire>
-        <User classid="UserCmp" id="2114474788" name="MTB:MTBsignal" x="1728" y="1980" w="127" h="62" z="1180" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="2114474788" name="MTB:MTBsignal" x="1728" y="1962" w="127" h="62" z="1180" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
@@ -53035,7 +53126,7 @@ $out = mtb_return_value
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1797205884" name="master:pgb" x="1818" y="2016" w="106" h="40" z="1210" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1797205884" name="master:pgb" x="1818" y="1998" w="106" h="40" z="1210" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="55341900">
             <param name="Name" value="mtb_s_mtrfrgnd" />
             <param name="Group" value="" />
@@ -53050,38 +53141,38 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1725862812" name="master:datalabel" x="1800" y="1980" w="94" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1725862812" name="master:datalabel" x="1800" y="1962" w="94" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
             <param name="Name" value="mtb_s_mtrfrgnd" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1570094838" name="master:export" x="1872" y="1980" w="119" h="24" z="1190" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1570094838" name="master:export" x="1872" y="1962" w="119" h="24" z="1190" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
             <param name="Name" value="out_mtrfrgnd" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1993865774" name="" x="1800" y="1980" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1993865774" name="" x="1800" y="1962" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="1596063214" name="" x="1800" y="1980" w="28" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1596063214" name="" x="1800" y="1962" w="28" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="0" y="36" />
           <vertex x="18" y="36" />
         </Wire>
-        <User classid="UserCmp" id="1699764828" name="MTB:MTBsignal" x="2052" y="1980" w="127" h="62" z="1200" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1699764828" name="MTB:MTBsignal" x="2052" y="1962" w="127" h="62" z="1200" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="64514828">
             <param name="Name" value="" />
             <param name="sigfunc" value="Pref" />
-            <param name="symbol" value="mtb_s_sips" />
+            <param name="symbol" value="mtb_s_sips_g" />
             <param name="suffix" value="_signal" />
             <param name="sink" value="1" />
             <param name="rank" value="mtb_rank" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="720405305" name="master:pgb" x="2142" y="2016" w="77" h="40" z="1230" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="720405305" name="master:pgb" x="2142" y="1998" w="91" h="40" z="1230" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="55341900">
-            <param name="Name" value="mtb_s_sips" />
+            <param name="Name" value="mtb_s_sips_g" />
             <param name="Group" value="" />
             <param name="UseSignalName" value="0" />
             <param name="enab" value="1" />
@@ -53094,26 +53185,26 @@ $out = mtb_return_value
             <param name="Min" value="-2.0" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="573770124" name="master:datalabel" x="2124" y="1980" w="66" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="573770124" name="master:datalabel" x="2124" y="1962" w="80" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="127230955">
-            <param name="Name" value="mtb_s_sips" />
+            <param name="Name" value="mtb_s_sips_g" />
           </paramlist>
         </User>
-        <User classid="UserCmp" id="1723184213" name="master:export" x="2196" y="1980" w="90" h="24" z="1220" orient="2" defn="master:export" link="-1" q="4" disable="false">
+        <User classid="UserCmp" id="1723184213" name="master:export" x="2196" y="1962" w="104" h="24" z="1220" orient="2" defn="master:export" link="-1" q="4" disable="false">
           <paramlist name="" link="-1" crc="68967217">
-            <param name="Name" value="out_sips" />
+            <param name="Name" value="out_sips_g" />
           </paramlist>
         </User>
-        <Wire classid="WireOrthogonal" id="1323172581" name="" x="2124" y="1980" w="46" h="10" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1323172581" name="" x="2124" y="1962" w="46" h="10" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="36" y="0" />
         </Wire>
-        <Wire classid="WireOrthogonal" id="1270524215" name="" x="2124" y="1980" w="28" h="46" orient="0" disable="false">
+        <Wire classid="WireOrthogonal" id="1270524215" name="" x="2124" y="1962" w="28" h="46" orient="0" disable="false">
           <vertex x="0" y="0" />
           <vertex x="0" y="36" />
           <vertex x="18" y="36" />
         </Wire>
-        <Line classid="Divider" id="1761636248" name="" x="1584" y="1926" w="810" h="0" orient="0">
+        <Line classid="Divider" id="1761636248" name="" x="1584" y="1908" w="810" h="0" orient="0">
           <paramlist>
             <param name="state" value="1" />
             <param name="color" value="0" />
@@ -53122,7 +53213,7 @@ $out = mtb_return_value
             <param name="weight" value="2" />
           </paramlist>
         </Line>
-        <Line classid="Divider" id="182058290" name="" x="1584" y="1422" w="810" h="0" orient="0">
+        <Line classid="Divider" id="182058290" name="" x="1584" y="1404" w="810" h="0" orient="0">
           <paramlist>
             <param name="state" value="1" />
             <param name="color" value="0" />
@@ -53131,7 +53222,7 @@ $out = mtb_return_value
             <param name="weight" value="2" />
           </paramlist>
         </Line>
-        <Line classid="Divider" id="1236765809" name="" x="1584" y="1242" w="810" h="0" orient="0">
+        <Line classid="Divider" id="1236765809" name="" x="1584" y="1224" w="810" h="0" orient="0">
           <paramlist>
             <param name="state" value="1" />
             <param name="color" value="0" />
@@ -53140,6 +53231,50 @@ $out = mtb_return_value
             <param name="weight" value="2" />
           </paramlist>
         </Line>
+        <User classid="UserCmp" id="831938635" name="MTB:MTBsignal" x="2052" y="2052" w="127" h="62" z="1200" orient="0" defn="MTB:MTBsignal" link="-1" q="4" disable="false">
+          <paramlist name="" link="-1" crc="64514828">
+            <param name="Name" value="" />
+            <param name="sigfunc" value="Pref" />
+            <param name="symbol" value="mtb_s_sips_d" />
+            <param name="suffix" value="_signal" />
+            <param name="sink" value="1" />
+            <param name="rank" value="mtb_rank" />
+          </paramlist>
+        </User>
+        <User classid="UserCmp" id="2117145266" name="master:pgb" x="2142" y="2088" w="91" h="40" z="1230" orient="0" defn="master:pgb" link="-1" q="4" disable="false">
+          <paramlist name="" link="-1" crc="55341900">
+            <param name="Name" value="mtb_s_sips_d" />
+            <param name="Group" value="" />
+            <param name="UseSignalName" value="0" />
+            <param name="enab" value="1" />
+            <param name="Display" value="1" />
+            <param name="Scale" value="1.0" />
+            <param name="Units" value="" />
+            <param name="mrun" value="0" />
+            <param name="Pol" value="0" />
+            <param name="Max" value="2.0" />
+            <param name="Min" value="-2.0" />
+          </paramlist>
+        </User>
+        <User classid="UserCmp" id="202967394" name="master:datalabel" x="2124" y="2052" w="80" h="23" z="1" orient="0" defn="master:datalabel" link="-1" q="4" disable="false">
+          <paramlist name="" link="-1" crc="127230955">
+            <param name="Name" value="mtb_s_sips_d" />
+          </paramlist>
+        </User>
+        <User classid="UserCmp" id="1051955663" name="master:export" x="2196" y="2052" w="104" h="24" z="1220" orient="2" defn="master:export" link="-1" q="4" disable="false">
+          <paramlist name="" link="-1" crc="68967217">
+            <param name="Name" value="out_sips_d" />
+          </paramlist>
+        </User>
+        <Wire classid="WireOrthogonal" id="1675760542" name="" x="2124" y="2052" w="46" h="10" orient="0" disable="false">
+          <vertex x="0" y="0" />
+          <vertex x="36" y="0" />
+        </Wire>
+        <Wire classid="WireOrthogonal" id="653735812" name="" x="2124" y="2052" w="28" h="46" orient="0" disable="false">
+          <vertex x="0" y="0" />
+          <vertex x="0" y="36" />
+          <vertex x="18" y="36" />
+        </Wire>
       </schematic>
     </Definition>
     <Definition classid="UserCmpDefn" name="PLL_ADAPTIVE" build="" crc="23662772" view="false" instances="0" date="1775836563" id="1042010625" w="320" h="400" url="" group="">
@@ -56098,7 +56233,7 @@ $iqneg = $ineg * Sin(v_neg_p-i_neg_p)]]></segment>
         </Gfx>
       </graphics>
     </Definition>
-    <Definition classid="UserCmpDefn" name="PLL_seq_src" build="" crc="99126345" view="false" instances="0" date="1778493871" id="146087733" w="320" h="400" url="" group="">
+    <Definition classid="UserCmpDefn" name="PLL_seq_src" build="" crc="99126345" view="false" instances="0" date="1782912801" id="146087733" w="320" h="400" url="" group="">
       <paramlist>
         <param name="Description" value="" />
       </paramlist>
@@ -57006,7 +57141,7 @@ $iqneg = $ineg * Sin(v_neg_p-i_neg_p)]]></segment>
         </User>
       </schematic>
     </Definition>
-    <Definition classid="UserCmpDefn" name="PLL_ADAPTIVE_src" build="" crc="15585498" view="false" instances="0" date="1778493871" id="1299688213" w="320" h="400" url="" group="">
+    <Definition classid="UserCmpDefn" name="PLL_ADAPTIVE_src" build="" crc="15585498" view="false" instances="0" date="1782912801" id="1299688213" w="320" h="400" url="" group="">
       <paramlist>
         <param name="Description" value="" />
       </paramlist>
@@ -66310,7 +66445,7 @@ $iqneg = $ineg * Sin(v_neg_p-i_neg_p)]]></segment>
     </Resource>
   </List>
   <hierarchy>
-    <call link="215306276" name="MTB:DS" z="-1" view="false" instance="0">
+    <call link="973415864" name="MTB:DS" z="-1" view="false" instance="0">
       <call link="855062775" name="MTB:Main" z="-1" view="true" instance="0">
         <call link="2118952145" name="MTB:MTB" z="-1" view="false" instance="0">
           <call link="168397858" name="MTB:ThreePhaseCtrl" z="2440" view="false" instance="0" />
