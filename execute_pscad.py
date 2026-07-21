@@ -117,7 +117,7 @@ def startPSCAD():
             if len(certs) > 0:
                 # finding a license with open instances
                 for cert in list(certs.values()):
-                    if cert.meets([('EMTDC Instances', volley)]):
+                    if cert.meets([('EMTDC Instances', volley)]) and (cert.available() > 0):
                         print('Acquiring Certificate Now! : %s', str(cert))
                         pscad.get_certificate(cert)
                         print('PSCAD should have a license now\n')
