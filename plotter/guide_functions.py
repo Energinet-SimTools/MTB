@@ -50,7 +50,6 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
 
         Pn = settingsDict['Pn']                                                  # Nominal power [MW]         
         P0 = guideData['MTB\\mtb_s_pref_pu'][0]                                  # Initial active power setpoint, P0
-        Pavail0 = guideData['MTB\\mtb_s_pavail_pu'][0]                           # Initial limited active power available value, Pavail0 
 
         CaseName = caseDf['Case']['Name'].item()                                 # Get the Case Name from the caseDf DataFrame for easier reference
         Qmode = caseDf['Initial Settings']['Qmode'].item()                       # Get the Q control mode from the caseDf DataFrame for easier reference
@@ -79,7 +78,6 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             s_fsm = settingsDict['FSM droop']                                       # FSM droop in [%]
             db = settingsDict['FSM deadband']                                       # FSM deadband in [Hz]
             FSM = caseDf['Initial Settings']['Pmode'].item() == 'LFSM+FSM'          # FSM mode enabled
-            fn = 50                                                                 # Nominal frequency [Hz]
             Td = 0.2                                                                # Delay time [s]
 
             guideData['f_hz_Td'] = guideDelay(guideData['MTB\\pll_f_hz'], Td, Ts)   # Delayed the 'pll_f_hz' signal                       
