@@ -104,7 +104,7 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
                 guideFigs.append('Ppoc')
                 guideSignals.append('P_pu_LFSM_Ramp_2s')                                            
         
-        elif 'SystemProtect' not in caseDf['Case']['Name'].item() or 'Fault' not in caseDf['Case']['Name'].item() or 'LVFRT' not in caseDf['Case']['Name'].item():
+        elif 'SIPS' not in caseDf['Case']['Name'].item() or 'Fault' not in caseDf['Case']['Name'].item() or 'LVFRT' not in caseDf['Case']['Name'].item():
             guideData['P_pu_PoC'] = guideData['MTB\\mtb_s_pref_pu']
             guideFigs.append('Ppoc')
             guideSignals.append('P_pu_PoC')  
