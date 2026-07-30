@@ -83,7 +83,6 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             Td = 0.2                                                                # Delay time [s]
 
             guideData['f_hz_Td'] = guideDelay(guideData['MTB\\pll_f_hz'], Td, Ts)   # Delayed the 'pll_f_hz' signal                       
-            guideData.loc[guideData['time'] < tThresh, 'f_hz_Td'] = fn              # Set values for t < tThresh to fn to eliminate the initialisation transients
             guideData['f_hz_Td_Lpf'] = guideLPF(guideData['f_hz_Td'], fc, 1/Ts)     # Pass the delayed signal through an LPF
 
             if 'step' in CaseName and not 'pstep' in CaseName: # Run guideLFSM only for 'step', but not for 'pstep'
@@ -103,10 +102,39 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             if not 'step' in CaseName or 'pstep' in CaseName: # Run guideLFSM only for 'step', but not for 'pstep'
                 Td_2s = 2
                 guideData['P_pu_LFSM_Ramp_2s'] = guideDelay(guideData['P_pu_LFSM_Ramp'], Td_2s, Ts)
-                guideData.loc[guideData['time'] < tThresh, 'P_pu_LFSM_Ramp_2s'] = min(P0, Pavail0)      # Set values for t < tThresh
                 guideFigs.append('Ppoc')
-                guideSignals.append('P_pu_LFSM_Ramp_2s')                                            
-        
+                guideSignals.append('P_pu_LFSM_Ramp_2s')       
+                                                     
+        # SIPS cases
+        elif 'SIPS' in CaseName:
+            if 'MTB\\mtb_s_sips_g' not in guideData.columns:
+                raise KeyError("Missing required signal: 'MTB\\mtb_s_sips_g'")
+
+            # Decode SIPS command -> active power ceiling (pu)
+            guideData['P_pu_PoC_SIPS_ref'] = guideSIPS(
+                Pref=guideData['MTB\\mtb_s_pref_pu'],
+                SIPSg=guideData['MTB\\mtb_s_sips_g']
+            )
+
+            # 0 s delay + ~1 Hz response
+            fc_sips_fast = 1.0
+            guideData['P_pu_PoC'] = guideLPF(guideData['P_pu_PoC_SIPS_ref'], fc_sips_fast, 1 / Ts)
+            guideData.loc[guideData['time'] < tThresh, 'P_pu_PoC'] = P0
+
+            # 1 s delay + ~0.1 Hz response (10 s)
+            Td_sips = 1.0
+            fc_sips_slow = 0.1
+            guideData['P_pu_PoC_1s'] = guideLPF(
+                guideDelay(guideData['P_pu_PoC_SIPS_ref'], Td_sips, Ts),
+                fc_sips_slow,
+                1 / Ts
+            )
+            guideData.loc[guideData['time'] < tThresh, 'P_pu_PoC_1s'] = P0
+
+            guideFigs.extend(['Ppoc', 'Ppoc'])
+            guideSignals.extend(['P_pu_PoC', 'P_pu_PoC_1s'])
+
+        # Default case for PoC active power guide signal           
         elif 'SIPS' not in CaseName and 'Fault' not in CaseName and 'LVFRT' not in CaseName:
             guideData['P_pu_PoC'] = guideData['MTB\\mtb_s_pref_pu']
             guideFigs.append('Ppoc')
@@ -255,15 +283,19 @@ def guideDelay(x, Td, Ts):
         delayed signal
     '''
     delay_samples = int(round(Td/Ts))
-    b = np.zeros(delay_samples + 1)
-    b[delay_samples] = 1    # For a pure delay of N samples, b = [0, 0, ..., 0, 1] (where 1 is at index N)
-    a = np.array([1.0])     # For an FIR filter (pure delay), a = [1]
-
-    if delay_samples == 0:
+    if delay_samples <= 0:
         return x  # No delay needed, return original signal
+
+    x_arr = np.asarray(x)
+    y = np.empty_like(x_arr)
     
-    # Apply the filter to the input signal
-    return lfilter(b, a, x)
+    # Hold initial value before delayed samples become available
+    y[:delay_samples] = x_arr[0]
+    y[delay_samples:] = x_arr[:-delay_samples]
+
+    if isinstance(x, pd.Series):
+        return pd.Series(y, index=x.index)
+    return y
 
 
 def guidePramp(Pref, Pn, Tstep, Pstep, t):
@@ -599,3 +631,41 @@ def guideFFC(Upos, Iq0, DK, DSO):
     return IqFFC
 
 
+def guideSIPS(Pref, SIPSg, step_setpoints=None):
+    '''
+    Decode MTB SIPS bitfield and return commanded active power ceiling.
+
+    Bit 0: reserved
+    Bit 1..N: SIPS steps
+    Default Energinet steps:
+      1 -> 0.70 pu
+      2 -> 0.50 pu
+      3 -> 0.40 pu
+      4 -> 0.25 pu
+      5 -> 0.00 pu
+
+    If multiple steps are active, the lowest reduction is used
+    (i.e., highest remaining power setpoint among active bits).
+    '''
+    if step_setpoints is None:
+        step_setpoints = {1: 0.70, 2: 0.50, 3: 0.40, 4: 0.25, 5: 0.00}
+
+    pref = np.asarray(Pref, dtype=float)
+    g = np.asarray(SIPSg)
+    g = np.nan_to_num(g, nan=0.0)
+    g = np.rint(g).astype(np.int64)
+
+    best_setpoint = np.zeros_like(pref, dtype=float)
+    any_active = np.zeros_like(pref, dtype=bool)
+
+    for bit, setpoint in step_setpoints.items():
+        active = ((g >> bit) & 1) == 1
+        best_setpoint = np.where(active, np.maximum(best_setpoint, setpoint), best_setpoint)
+        any_active = np.logical_or(any_active, active)
+
+    limit = np.where(any_active, best_setpoint, 1.0)
+    sips_pref = np.minimum(pref, limit)
+
+    if isinstance(Pref, pd.Series):
+        return pd.Series(sips_pref, index=Pref.index)
+    return sips_pref
