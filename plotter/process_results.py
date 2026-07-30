@@ -40,10 +40,8 @@ def getUniqueEmtSignals(figureList):
     # Signals required to generate Guide Waveforms
     emt_signals = ['MTB\\mtb_s_pavail_pu',
                    'MTB\\mtb_s_qudroop',
-                   'MTB\\mtb_s_1',
-                   'MTB\\mtb_s_2',
-                   'MTB\\mtb_s_3',
-                   'MTB\\mtb_s_4']
+                   'MTB\\mtb_s_sips_g',
+                   'MTB\\mtb_s_sips_d']
     
     for fig in figureList:
         if fig.emt_signal_1 != '': emt_signals.append(fig.emt_signal_1)
