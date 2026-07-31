@@ -205,40 +205,50 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
                         
         # Fast Fault Current contribution cases
         if 'FRT' in CaseName or 'Fault' in CaseName or 'support' in CaseName:
-            Iq0 = 0
             V_EPS = 1e-6
-            guideData['Iq_pu_FFC_Inst'] = 0.0    # Create new signal to populate
+            V_HYS = 0.01  # 1% voltage hysteresis for robust FRT state
+            IN_FRT = False
+
+            # Select Q signal used to derive pre-fault Iq0
+            if Qmode == 'Q' or (Qmode == 'Default' and Qdefault == 'Q'):
+                Q0 = guideData['Q_pu_Q_Ctrl']
+            elif Qmode == 'Q(U)' or (Qmode == 'Default' and Qdefault == 'Q(U)'):
+                Q0 = guideData['Q_pu_QU_Ctrl'] if 'Q_pu_QU_Ctrl' in guideData.columns else guideData['Q_pu_QU_Inst']
+            elif Qmode == 'PF' or (Qmode == 'Default' and Qdefault == 'PF'):
+                Q0 = guideData['Q_pu_Qpf_Ctrl']
+            else:
+                Q0 = pd.Series(0.0, index=guideData.index)
+
+            # Initialize Iq0 from first sample (safe fallback)
+            _U0 = float(guideData['MTB\\fft_pos_Vmag_pu'].iloc[0])
+            U0 = max(_U0, V_EPS) if np.isfinite(_U0) else 1.0
+            Iq0 = float(Q0.iloc[0]) / U0
+
+            guideData['Iq_pu_FFC_Inst'] = 0.0
             for i, row in guideData.iterrows():
-                if row['time'] < tThresh:
-                    continue
-                
-                vpos = row['MTB\\fft_pos_Vmag_pu']
-                if not np.isfinite(vpos):
+                Upos = row['MTB\\fft_pos_Vmag_pu']
+                if not np.isfinite(Upos):
                     guideData.loc[i, 'Iq_pu_FFC_Inst'] = Iq0
                     continue
-                
-                if vpos >= vposFrtLimit:
-                    denom = max(vpos, V_EPS)  # protect against divide-by-zero / bad values
 
-                    # This assumes the guide Iq = Qpoc/Upos
-                    if Qmode == 'Q' or (Qmode == 'Default' and Qdefault == 'Q'):            
-                        Iq0 =  row['Q_pu_Q_Ctrl']/denom
-                    if Qmode == 'Q(U)' or (Qmode == 'Default' and Qdefault == 'Q(U)'):
-                        Iq0 =  row['Q_pu_QU_Inst']/denom
-                    if Qmode == 'PF' or (Qmode == 'Default' and Qdefault == 'PF'):
-                        Iq0 =  row['Q_pu_Qpf_Ctrl']/denom
-                        
-                IqFFC = guideFFC(Upos=vpos, Iq0 = Iq0, DK=DK, DSO=DSO)
-                    
-                guideData.loc[i, 'Iq_pu_FFC_Inst'] = IqFFC                                     
-            
-            # Change LPF setting for Iq
+                # FRT state with hysteresis
+                if not IN_FRT and Upos < vposFrtLimit:
+                    IN_FRT = True
+                elif IN_FRT and Upos > (vposFrtLimit + V_HYS):
+                    IN_FRT = False
+
+                # Update Iq0 only outside FRT
+                if not IN_FRT:
+                    U0 = max(Upos, V_EPS)
+                    Iq0 = Q0.loc[i] / U0
+
+                guideData.loc[i, 'Iq_pu_FFC_Inst'] = guideFFC(Upos=Upos, Iq0=Iq0, DK=DK, DSO=DSO)
+
             trise_FFC = 0.025                                                   # Rise time [s]
-            fc_FFC = 0.35/trise_FFC                                             # Cut-off frequency [Hz]
-
-            guideData['Iq_pu_FFC'] = guideLPF(guideData['Iq_pu_FFC_Inst'], fc_FFC, 1/Ts)            
+            fc_FFC = 0.35 / trise_FFC                                           # Cut-off frequency [Hz]
+            guideData['Iq_pu_FFC'] = guideLPF(guideData['Iq_pu_FFC_Inst'], fc_FFC, 1/Ts)
             guideFigs.append('Ireactive')
-            guideSignals.append('Iq_pu_FFC')  
+            guideSignals.append('Iq_pu_FFC')
 
         returnDict = {'figs': guideFigs, 'signals': guideSignals, 'data': guideData}
             
