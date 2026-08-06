@@ -496,8 +496,12 @@ def drawPlot(rank: int,
     imagePlots: List[go.Figure] = list()
 
     setupPlotLayout(rankName, config, figureList, htmlPlots, imagePlots, rank)
-    if len(ranksCursor) > 0:
+    
+    genCursors = len(ranksCursor) > 0 and (config.genCursorHTML or config.genCursorPDF)
+    
+    if genCursors:
         dfCursorsList = setupCursorDataFrame(ranksCursor)
+        
     for result in resultList:
         print(f'Processing: {result.fullpath}')
         if result.typ == ResultType.RMS:
@@ -528,11 +532,10 @@ def drawPlot(rank: int,
             addResults(htmlPlots, result, resultData, figureList, colorMap, config.htmlColumns, settingsDict, caseDf, config.genGuide)
         if config.genImage:
             addResults(imagePlots, result, resultData, figureList, colorMap,config.imageColumns, settingsDict, caseDf, config.genGuide)
-        if len(ranksCursor) > 0:
+        if genCursors:
             addCursorMetrics(ranksCursor, dfCursorsList, result, resultData, settingsDict,  caseDf)
     
-    
-    goCursorList = genCursorPlotlyTables(ranksCursor, dfCursorsList) if (len(ranksCursor) > 0 and (config.genCursorHTML or config.genCursorPDF)) else []  
+    goCursorList = genCursorPlotlyTables(ranksCursor, dfCursorsList) if genCursors else []  
      
     if config.genHTML:
         create_html(htmlPlots, goCursorList, figurePath, rankName if rankName is not None else "", rank, config, rankList, rankNameDict)
