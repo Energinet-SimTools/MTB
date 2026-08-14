@@ -19,6 +19,7 @@ exportPath = config.get('General', 'Export folder', fallback='export')
 pythonPath = config.get('Python', 'Python path')
 parallel = config.getboolean('PowerFactory', 'parallel', fallback=True)
 QDSLcopyGrid = config.get('PowerFactory', 'QDSL copy grid', fallback='')
+createCaseFolder = config.getboolean('PowerFactory', 'create_case_folder', fallback=False)
 
 import sys
 sys.path.append(pythonPath)
@@ -122,6 +123,16 @@ def resetProjectUnits(project : pf.IntPrj) -> None:
 
   project.Deactivate() 
   project.Activate() 
+
+def getOrCreateFolder(parent : pf.DataObject, name : str) -> pf.DataObject:
+  '''
+  Return an existing PowerFactory folder or create it when missing.
+  '''
+  folder = parent.SearchObject(f'{name}.IntFolder')
+  if folder is None:
+    folder = parent.CreateObject('IntFolder', name)
+  assert folder is not None
+  return folder
 
 def setupResFiles(app : pf.Application, script : pf.ComPython, root : pf.DataObject):
   '''
@@ -406,12 +417,6 @@ def main():
     studyCaseFolder = project.CreateObject('IntPrjfolder', 'Study Cases')
     studyCaseFolder.SetAttribute('iopt_typ', 'study')
 
-  # Create task automation
-  taskAuto : pf.ComTasks = studyCaseFolder.CreateObject('ComTasks') #type: ignore
-  taskAuto.SetAttribute('iEnableParal', int(parallel))
-  taskAuto.SetAttribute('parMethod', 0)
-  (taskAuto.GetAttribute('parallelSetting')).SetAttribute('procTimeOut', 3600)
-
   # Find root object
   root = thisScript.GetParent()
 
@@ -420,6 +425,17 @@ def main():
   plantSettings, channels, cases, maxRank, ___ = cs.setup(casesheetPath = sheetPath, 
                                                      pscad = False,
                                                      pfEncapsulation = pfInterface)
+
+  if createCaseFolder:
+    caseFolderName = f'MTB_{plantSettings.Casegroup}'
+    studyCaseFolder = getOrCreateFolder(studyCaseFolder, caseFolderName)
+    varFolder = getOrCreateFolder(varFolder, caseFolderName)
+
+  # Create task automation in the same folder as the generated study cases
+  taskAuto : pf.ComTasks = studyCaseFolder.CreateObject('ComTasks') #type: ignore
+  taskAuto.SetAttribute('iEnableParal', int(parallel))
+  taskAuto.SetAttribute('parMethod', 0)
+  (taskAuto.GetAttribute('parallelSetting')).SetAttribute('procTimeOut', 3600)
 
   # Add user channel subscribers
   addCustomSubscribers(thisScript, channels)
