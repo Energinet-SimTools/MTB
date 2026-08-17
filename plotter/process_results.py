@@ -13,6 +13,8 @@ def getColNames(rawSigName, result):
 
         if len(splitSigName) == 2:
             sigColName = ('##' + splitSigName[0], splitSigName[1])
+        elif len(splitSigName) > 2:
+            sigColName = ('\\'.join(splitSigName[:-1]), splitSigName[-1])
         else:
             sigColName = rawSigName
     elif result.typ in (ResultType.EMT_INF, ResultType.EMT_CSV, ResultType.EMT_ZIP):
