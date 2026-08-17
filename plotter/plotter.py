@@ -477,7 +477,8 @@ def drawPlot(rank: int,
     Draws plots for html and static image export.    
     '''
     caseDf = casesDf[casesDf['Case']['Rank']==rank] # Get all case data for the current rank
-    rankName = caseDf['Case']['Name'].squeeze()     # Get the rank Name for the current rank
+    _name_col = caseDf['Case']['Name']
+    rankName = str(_name_col.iloc[0]) if not _name_col.empty else None
     
     print(f'Drawing plot for Rank {rank}: {rankName}')
 
@@ -622,7 +623,7 @@ def setupPlotLayout(rankName, config, figureList, htmlPlots, imagePlots, rank):
         else:
             plotList.append(make_subplots(rows=ceil(len(figureList) / columnNr), cols=columnNr))
             plotList[-1].update_layout(height=500 * ceil(len(figureList) / columnNr))  # type: ignore
-            if plotList == imagePlots and rankName is not None:
+            if plotList == imagePlots and isinstance(rankName, str):
                 plotList[-1].update_layout(title_text=rankName)  # type: ignore
 
 
@@ -732,7 +733,7 @@ def create_html(plots: List[go.Figure], goCursorList: List[go.Figure], path: str
     dropdown_content = ''
     increment = 5 if len(rankList) < 130 else 10
     while idx < len(rankList):
-        dropdown_content += f'<a href="{rankList[idx]}.html">Rank {rankList[idx]}: {rankNameDict[rankList[idx]]}</a>\n'
+        dropdown_content += f'<a href="{rankList[idx]}.html">Rank {rankList[idx]}: {rankNameDict.get(rankList[idx], "")}</a>\n'
         idx += increment
     
     # Determine the Previous and Next Rank html page for the Navbar
