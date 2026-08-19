@@ -652,8 +652,8 @@ def guideSIPS(Pref, SIPSg, step_setpoints=None):
       4 -> 0.25 pu
       5 -> 0.00 pu
 
-    If multiple steps are active, the lowest reduction is used
-    (i.e., highest remaining power setpoint among active bits).
+    If multiple steps are active, the highest reduction is used
+    (i.e., lowest remaining power setpoint among active bits).
     '''
     if step_setpoints is None:
         step_setpoints = {1: 0.70, 2: 0.50, 3: 0.40, 4: 0.25, 5: 0.00}
@@ -663,12 +663,12 @@ def guideSIPS(Pref, SIPSg, step_setpoints=None):
     g = np.nan_to_num(g, nan=0.0)
     g = np.rint(g).astype(np.int64)
 
-    best_setpoint = np.zeros_like(pref, dtype=float)
+    best_setpoint = np.ones_like(pref, dtype=float)
     any_active = np.zeros_like(pref, dtype=bool)
 
     for bit, setpoint in step_setpoints.items():
         active = ((g >> bit) & 1) == 1
-        best_setpoint = np.where(active, np.maximum(best_setpoint, setpoint), best_setpoint)
+        best_setpoint = np.where(active, np.minimum(best_setpoint, setpoint), best_setpoint)
         any_active = np.logical_or(any_active, active)
 
     limit = np.where(any_active, best_setpoint, 1.0)
