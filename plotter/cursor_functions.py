@@ -462,16 +462,19 @@ def cursorResponseDelay(cursorSignalsDf, time_interval):
      
         if len(t) > 0:
             # Find the risetime of y
-            y0 = y[0]      # Cursor start y value
-            y1 = y[-1]     # Cursor end y value
-            dy = y1 - y0   # Difference in y values
+            y0 = y[0]           # Cursor start y value
+            y1 = y[-1]          # Cursor end y value
+            dy = y1 - y0        # Difference in y values
             
             if dy > 0:                      # Response delay time for a rising signal
                 mask = (y <= (y0 + 0.1*dy)) # The 10% rise value mask
             else:                           # Response delay time for a falling time
                 mask = (y >= (y0 + 0.1*dy)) # The 10% fall value mask
             
-            t = t[mask]    # Get the rise/fall response delay time range values
+            t = t[mask]         # Get the 10% rise/fall response delay time range values
+            
+            if len(t) == 0:     # Check for empty time range, which can happen if the signal is flat or does not reach the 10% rise/fall value
+                return np.nan
             
             t_response = t.max() - t.min()      # Get the rise/fall time      
         
@@ -494,9 +497,9 @@ def cursorRiseFallTime(cursorSignalsDf, time_interval):
      
         if len(t) > 0:
             # Find the risetime of y
-            y0 = y[0]      # Cursor start y value
-            y1 = y[-1]     # Cursor end y value
-            dy = y1 - y0   # Difference in y values
+            y0 = y[0]           # Cursor start y value
+            y1 = y[-1]          # Cursor end y value
+            dy = y1 - y0        # Difference in y values
             
             if dy > 0:                                              # Rise time
                 mask = (y >= (y0 + 0.1*dy)) & (y <= (y0 + 0.9*dy))  # The 10% to 90% rise value mask
@@ -504,6 +507,9 @@ def cursorRiseFallTime(cursorSignalsDf, time_interval):
                 mask = (y <= (y0 + 0.1*dy)) & (y >= (y0 + 0.9*dy))  # The 10% to 90% fall value mask
             
             t = t[mask]         # Get the rise/fall time range values
+            
+            if len(t) == 0:     # Check for empty time range, which can happen if the signal is flat or does not reach the 10% to 90% range
+                return (np.nan, np.nan)
             
             tRiseFall = t.max() - t.min()      # Get the rise/fall time      
         

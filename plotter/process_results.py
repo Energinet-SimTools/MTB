@@ -13,6 +13,8 @@ def getColNames(rawSigName, result):
 
         if len(splitSigName) == 2:
             sigColName = ('##' + splitSigName[0], splitSigName[1])
+        elif len(splitSigName) > 2:
+            sigColName = ('\\'.join(splitSigName[:-1]), splitSigName[-1])
         else:
             sigColName = rawSigName
     elif result.typ in (ResultType.EMT_INF, ResultType.EMT_CSV, ResultType.EMT_ZIP):
@@ -40,10 +42,8 @@ def getUniqueEmtSignals(figureList):
     # Signals required to generate Guide Waveforms
     emt_signals = ['MTB\\mtb_s_pavail_pu',
                    'MTB\\mtb_s_qudroop',
-                   'MTB\\mtb_s_1',
-                   'MTB\\mtb_s_2',
-                   'MTB\\mtb_s_3',
-                   'MTB\\mtb_s_4']
+                   'MTB\\mtb_s_sips_g',
+                   'MTB\\mtb_s_sips_d']
     
     for fig in figureList:
         if fig.emt_signal_1 != '': emt_signals.append(fig.emt_signal_1)
