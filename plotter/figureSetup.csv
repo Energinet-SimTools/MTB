@@ -13,7 +13,7 @@ figure;title;units;emt_signal_1;emt_signal_2;emt_signal_3;rms_signal_1;rms_signa
 12;Unit;pu;Unit\unit_fft_pos_Id_pu;Unit\unit_fft_pos_Iq_pu;Unit\unit_fft_pos_Vmag_pu;Unit_1\m:i1P:bus1 in p.u.;Unit_1\m:i1Q:bus1 in p.u.;Unit_1\m:u1:bus1 in p.u.;gradient;0.5;;
 13;Vpg (Inst.);kV;MTB\meas_Vag_kV;MTB\meas_Vbg_kV;MTB\meas_Vcg_kV;;;;gradient;0.5;1,2,3,4,5,6,7,8,9,10,98;
 14;Iline (Inst.);kA;MTB\meas_Ia_kA;MTB\meas_Ib_kA;MTB\meas_Ic_kA;;;;gradient;0.5;1,2,3,4,5,6,7,8,9,10,98;
-15;SIPS (G1);Integer/Binary;mtb_SIPS_g;SIPS_g_step_1;SIPS_g_step_2;MTB\MTB\mtb_s_sips_g.ElmDsl\s:mtb_s_sips;MTB\MTB\mtb_sips_decoder_g.ElmDsl\s:sips_step_1;MTB\MTB\mtb_sips_decoder_g.ElmDsl\s:sips_step_2;gradient;0.5;57,58,59,177,178;
+15;SIPS (G1);Integer/Binary;mtb_SIPS_g;SIPS_g_step_1;SIPS_g_step_2;MTB\MTB\mtb_s_sips_g.ElmDsl\s:yo;MTB\MTB\mtb_sips_decoder_g.ElmDsl\s:sips_step_1;MTB\MTB\mtb_sips_decoder_g.ElmDsl\s:sips_step_2;gradient;0.5;57,58,59,177,178;
 16;SIPS (G2);Binary;SIPS_g_step_3;SIPS_g_step_4;SIPS_g_step_5;MTB\MTB\mtb_sips_decoder_g.ElmDsl\s:sips_step_3;MTB\MTB\mtb_sips_decoder_g.ElmDsl\s:sips_step_4;MTB\MTB\mtb_sips_decoder_g.ElmDsl\s:sips_step_5;gradient;0.5;57,58,59,177,178;
 17;SIPS (D1);Integer/Binary;mtb_SIPS_d;SIPS_d_step_1;SIPS_d_step_2;MTB\MTB\mtb_s_sips_d.ElmDsl\s:yo;MTB\MTB\mtb_sips_decoder_d.ElmDsl\s:sips_step_1;MTB\MTB\mtb_sips_decoder_d.ElmDsl\s:sips_step_2;gradient;0.5;1043,1044,1087,1088;
 18;SIPS (D2);Binary;SIPS_d_step_3;SIPS_d_step_4;SIPS_d_step_5;MTB\MTB\mtb_sips_decoder_d.ElmDsl\s:sips_step_3;MTB\MTB\mtb_sips_decoder_d.ElmDsl\s:sips_step_4;MTB\MTB\mtb_sips_decoder_d.ElmDsl\s:sips_step_5;gradient;0.5;1043,1044,1087,1088;
