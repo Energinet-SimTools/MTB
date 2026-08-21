@@ -45,6 +45,7 @@ sheetPath = config.get('General', 'Casesheet path', fallback='testcases.xlsx').s
 exportPath = config.get('General', 'Export folder', fallback='export').strip()
 pythonPath = config.get('Python', 'Python path', fallback='').strip()
 volley = config.getint('PSCAD', 'Volley', fallback=16)
+PSCADVersion = config.get('PSCAD', 'PSCAD version').strip()
 traceAffinity = config.getboolean('PSCAD', 'Tracing', fallback=False)
 stateAnimation = config.getboolean('PSCAD', 'State animation', fallback=False)
 onlyInUseChannels = config.getboolean('PSCAD', 'Only in use channels', fallback=True)
@@ -98,8 +99,8 @@ def connectPSCAD() -> mhi.pscad.PSCAD:
 def startPSCAD():
    
     # Launch PSCAD
-    print('Starting PSCAD v5.0.2\n')
-    pscad = mhi.pscad.launch(version='5.0.2',
+    print('Starting PSCAD v'+PSCADVersion+'\n')
+    pscad = mhi.pscad.launch(version=PSCADVersion,
                              silence=True,
                              splash=False,
                              minimize=True,
