@@ -50,10 +50,12 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
 
         Pn = settingsDict['Pn']                                                  # Nominal power [MW]         
         P0 = guideData['MTB\\mtb_s_pref_pu'][0]                                  # Initial active power setpoint, P0
-        Pavail0 = guideData['MTB\\mtb_s_pavail_pu'][0]                           # Initial limited active power available value, Pavail0 
 
+        CaseName = caseDf['Case']['Name'].item()                                 # Get the Case Name from the caseDf DataFrame for easier reference
+        Qmode = caseDf['Initial Settings']['Qmode'].item()                       # Get the Q control mode from the caseDf DataFrame for easier reference
+        
         # Active Power Ramping cases
-        if ('P_step' in caseDf['Case']['Name'].item() or 'PQ/Pn' in caseDf['Case']['Name'].item()) and not 'Pavail' in caseDf['Case']['Name'].item():
+        if ('P_step' in CaseName or 'PQ/Pn' in CaseName) and not 'Pavail' in CaseName:
             assert caseDf['Event 1']['type'].item() == 'Pref'
             Tstep = caseDf['Event 1']['time'].item()
             Pstep = caseDf['Event 1']['X1'].item()
@@ -65,25 +67,23 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             guideSignals.append('P_pu_PoC_Ramp')
         
         # "Advance" (multi-step) Active Power Ramping cases (with limited Pavailabale cases)
-        elif 'Pref-change' in caseDf['Case']['Name'].item() or 'Pavail_step' in caseDf['Case']['Name'].item() or 'Pavail_variation' in caseDf['Case']['Name'].item():
+        elif 'Pref-change' in CaseName or 'Pavail_step' in CaseName or 'Pavail_variation' in CaseName:
             guideData['P_pu_PoC_Ramp'] = guideData['MTB\\mtb_s_pref_pu'].clip(upper=guideData['MTB\\mtb_s_pavail_pu']) # Create the active power reference signal clipped to the available power to 'populate' below
             guideData['P_pu_PoC_Ramp'] = guidePramp2(Pref=guideData['P_pu_PoC_Ramp'], Pn=Pn, Pavail=guideData['MTB\\mtb_s_pavail_pu'], Ts=Ts, P=guideData['P_pu_PoC_Ramp'])
             guideFigs.append('Ppoc')
             guideSignals.append('P_pu_PoC_Ramp')                                            
 
         # LFSM, FSM & RoCoF cases    
-        elif 'FSM' in caseDf['Case']['Name'].item() or 'RoCoF' in caseDf['Case']['Name'].item() or 'Freq' in caseDf['Case']['Name'].item() or 'freqStep' in caseDf['Case']['Name'].item():
+        elif 'FSM' in CaseName or 'RoCoF' in CaseName or 'Freq' in CaseName or 'freqStep' in CaseName:
             s_fsm = settingsDict['FSM droop']                                       # FSM droop in [%]
             db = settingsDict['FSM deadband']                                       # FSM deadband in [Hz]
             FSM = caseDf['Initial Settings']['Pmode'].item() == 'LFSM+FSM'          # FSM mode enabled
-            fn = 50                                                                 # Nominal frequency [Hz]
             Td = 0.2                                                                # Delay time [s]
 
             guideData['f_hz_Td'] = guideDelay(guideData['MTB\\pll_f_hz'], Td, Ts)   # Delayed the 'pll_f_hz' signal                       
-            guideData.loc[guideData['time'] < tThresh, 'f_hz_Td'] = fn              # Set values for t < tThresh to fn to eliminate the initialisation transients
-            guideData['f_hz_Td_Lpf'] = guideLPF(guideData['f_hz_Td'], fc, 1/Ts) # Pass the delayed signal through an LPF
+            guideData['f_hz_Td_Lpf'] = guideLPF(guideData['f_hz_Td'], fc, 1/Ts)     # Pass the delayed signal through an LPF
 
-            if 'step' in caseDf['Case']['Name'].item() and not 'pstep' in caseDf['Case']['Name'].item(): # Run guideLFSM only for 'step', but not for 'pstep'
+            if 'step' in CaseName and not 'pstep' in CaseName: # Run guideLFSM only for 'step', but not for 'pstep'
                 guideData['P_pu_LFSM_FFR'] = guideData['MTB\\mtb_s_pref_pu'].clip(upper=guideData['MTB\\mtb_s_pavail_pu']) # Create the 'dummy' active power reference signal clipped to the available power be to 'overwritten' below
                 for i, row in guideData.iterrows():
                     PpuLFSM = guideLFSM(Pref=row['MTB\\mtb_s_pref_pu'], f=row['f_hz_Td_Lpf'], Pavail=row['MTB\\mtb_s_pavail_pu'], DK=DK, FSM=FSM, s_fsm=s_fsm, db=db)
@@ -97,21 +97,50 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             guideFigs.append('Ppoc')
             guideSignals.append('P_pu_LFSM_Ramp')                                            
 
-            if not 'step' in caseDf['Case']['Name'].item() or 'pstep' in caseDf['Case']['Name'].item(): # Run guideLFSM only for 'step', but not for 'pstep'
+            if not 'step' in CaseName or 'pstep' in CaseName: # Run guideLFSM only for 'step', but not for 'pstep'
                 Td_2s = 2
                 guideData['P_pu_LFSM_Ramp_2s'] = guideDelay(guideData['P_pu_LFSM_Ramp'], Td_2s, Ts)
-                guideData.loc[guideData['time'] < tThresh, 'P_pu_LFSM_Ramp_2s'] = min(P0, Pavail0)      # Set values for t < tThresh
                 guideFigs.append('Ppoc')
-                guideSignals.append('P_pu_LFSM_Ramp_2s')                                            
-        
-        elif 'SystemProtect' not in caseDf['Case']['Name'].item() or 'Fault' not in caseDf['Case']['Name'].item() or 'LVFRT' not in caseDf['Case']['Name'].item():
+                guideSignals.append('P_pu_LFSM_Ramp_2s')       
+                                                     
+        # SIPS cases
+        elif 'SIPS' in CaseName:
+            if 'MTB\\mtb_s_sips_g' not in guideData.columns:
+                raise KeyError("Missing required signal: 'MTB\\mtb_s_sips_g'")
+
+            # Decode SIPS command -> active power ceiling (pu)
+            guideData['P_pu_PoC_SIPS_ref'] = guideSIPS(
+                Pref=guideData['MTB\\mtb_s_pref_pu'],
+                SIPSg=guideData['MTB\\mtb_s_sips_g']
+            )
+
+            # 0 s delay + ~1 Hz response
+            fc_sips_fast = 1.0
+            guideData['P_pu_PoC'] = guideLPF(guideData['P_pu_PoC_SIPS_ref'], fc_sips_fast, 1 / Ts)
+            guideData.loc[guideData['time'] < tThresh, 'P_pu_PoC'] = P0
+
+            # 1 s delay + ~0.1 Hz response (10 s)
+            Td_sips = 1.0
+            fc_sips_slow = 0.1
+            guideData['P_pu_PoC_1s'] = guideLPF(
+                guideDelay(guideData['P_pu_PoC_SIPS_ref'], Td_sips, Ts),
+                fc_sips_slow,
+                1 / Ts
+            )
+            guideData.loc[guideData['time'] < tThresh, 'P_pu_PoC_1s'] = P0
+
+            guideFigs.extend(['Ppoc', 'Ppoc'])
+            guideSignals.extend(['P_pu_PoC', 'P_pu_PoC_1s'])
+
+        # Default case for PoC active power guide signal           
+        elif 'SIPS' not in CaseName and 'Fault' not in CaseName and 'LVFRT' not in CaseName:
             guideData['P_pu_PoC'] = guideData['MTB\\mtb_s_pref_pu']
             guideFigs.append('Ppoc')
             guideSignals.append('P_pu_PoC')  
             
         Qdefault = settingsDict['Default Q mode']                
         # Q control cases
-        if caseDf['Initial Settings']['Qmode'].item() == 'Q' or caseDf['Initial Settings']['Qmode'].item() == 'Default' and Qdefault == 'Q':            
+        if Qmode == 'Q' or (Qmode == 'Default' and Qdefault == 'Q'):
             Qref0 = caseDf['Initial Settings']['Qref0'].item()                  # Initial reactive power setpoint, when Qmode == 'Q'
             
             guideData['Q_pu_Q_Ctrl'] = guideLPF(guideData['MTB\\mtb_s_qref'], fc, 1/Ts) # Guide response == Qref passed through a LPF      
@@ -120,7 +149,7 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             guideSignals.append('Q_pu_Q_Ctrl')  
 
         # Q(U) control cases
-        if caseDf['Initial Settings']['Qmode'].item() == 'Q(U)' or caseDf['Initial Settings']['Qmode'].item() == 'Default' and  Qdefault == 'Q(U)':
+        if Qmode == 'Q(U)' or (Qmode == 'Default' and  Qdefault == 'Q(U)'):
             Qref0 = 0.0                                                         # Note: This is the initial reactive power reference
 
             # Change LPF setting for Upos
@@ -131,16 +160,23 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             guideData['fft_pos_Vmag_pu_lpf'] = guideLPF(guideData['MTB\\fft_pos_Vmag_pu'], fc_Upos, 1/Ts)
             
             guideData['Q_pu_QU_Inst'] = Qref0      # Create new signal to populate
+            Qprev = Qref0
             for i, row in guideData.iterrows():
                 if row['time'] < tThresh:
+                    guideData.loc[i, 'Q_pu_QU_Inst'] = Qref0
                     continue
-                if row['fft_pos_Vmag_pu_lpf'] > vposFrtLimit: # No FRT
-                    QpuQU = guideQU(Uref=row['MTB\\mtb_s_qref'], Upos=row['fft_pos_Vmag_pu_lpf'], s=row['MTB\\mtb_s_qudroop'], Qref=Qref0) # Note: If Qmode == 'Q(U)', then 'mtb_s_qref' = Uref
-                    guideData.loc[i, 'Q_pu_QU_Inst'] = QpuQU 
+
+                if row['fft_pos_Vmag_pu_lpf'] > vposFrtLimit:  # No FRT
+                    Qnow = guideQU(
+                        Uref=row['MTB\\mtb_s_qref'],
+                        Upos=row['fft_pos_Vmag_pu_lpf'],
+                        s=row['MTB\\mtb_s_qudroop'],
+                        Qref=Qref0
+                    )
+                    guideData.loc[i, 'Q_pu_QU_Inst'] = Qnow
+                    Qprev = Qnow
                 else:
-                    # For the first index, keep the initialized value (Qref0); otherwise, use the previous value
-                    if i > guideData.index[0]:
-                        guideData.loc[i, 'Q_pu_QU_Inst'] = guideData.loc[i-1, 'Q_pu_QU_Inst']
+                    guideData.loc[i, 'Q_pu_QU_Inst'] = Qprev
                 
             # Change LPF setting for Q(U)
             trise_QU = 0.95                                                     # Rise time [s]
@@ -151,11 +187,12 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             guideSignals.append('Q_pu_QU_Ctrl')  
             
         #PF control mode
-        if caseDf['Initial Settings']['Qmode'].item() == 'PF' or caseDf['Initial Settings']['Qmode'].item() == 'Default' and Qdefault == 'PF':
+        if Qmode == 'PF' or (Qmode == 'Default' and Qdefault == 'PF'):
             PFref0 = caseDf['Initial Settings']['Qref0'].item()              # Initial PF setpoint, Qref0, when Qmode == 'PF'
             
             if caseDf['Event 1']['type'].item() == 'Pref':   # Pref changes -> slow ramping of Ppoc, thus use Ppoc and not Pref
-                guideData['Q_pu_Qpf_Inst'] = guideQpf(Ppoc=guideData['P_pu_PoC_Ramp'], PFref=PFref0)
+                Ppoc = guideData['P_pu_PoC_Ramp'] if 'P_pu_PoC_Ramp' in guideData.columns else guideData['MTB\\mtb_s_pref_pu'] # Safety check to ensure that the 'P_pu_PoC_Ramp' column exists in the DataFrame before using it
+                guideData['Q_pu_Qpf_Inst'] = guideQpf(Ppoc=Ppoc, PFref=PFref0)
             elif caseDf['Event 1']['type'].item() == 'Qref': # PFref changes & Pref constant
                 guideData['Q_pu_Qpf_Inst'] = guideQpf(Ppoc=guideData['MTB\\mtb_s_pref_pu'], PFref=guideData['MTB\\mtb_s_qref']) # Note that 'MTB\mtb_s_qref' = PF if Qmode == 'PF'
             else: # Use Initial settings
@@ -167,32 +204,51 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             guideSignals.append('Q_pu_Qpf_Ctrl')  
                         
         # Fast Fault Current contribution cases
-        if 'FRT' in caseDf['Case']['Name'].item() or 'Fault' in caseDf['Case']['Name'].item() or 'support' in caseDf['Case']['Name'].item():
-            Iq0 = 0
-            guideData['Iq_pu_FFC_Inst'] = 0.0    # Create new signal to populate
-            for i, row in guideData.iterrows():
-                if row['time'] < tThresh:
-                    continue
-                if row['MTB\\fft_pos_Vmag_pu'] >= vposFrtLimit:
-                    # This assumes the guide Iq = Qpoc/Upos
-                    if caseDf['Initial Settings']['Qmode'].item() == 'Q' or (caseDf['Initial Settings']['Qmode'].item() == 'Default' and Qdefault == 'Q'):            
-                        Iq0 =  row['Q_pu_Q_Ctrl']/row['MTB\\fft_pos_Vmag_pu']
-                    if caseDf['Initial Settings']['Qmode'].item() == 'Q(U)' or (caseDf['Initial Settings']['Qmode'].item() == 'Default' and Qdefault == 'Q(U)'):
-                        Iq0 =  row['Q_pu_QU_Inst']/row['MTB\\fft_pos_Vmag_pu']
-                    if caseDf['Initial Settings']['Qmode'].item() == 'PF' or (caseDf['Initial Settings']['Qmode'].item() == 'Default' and Qdefault == 'PF'):
-                        Iq0 =  row['Q_pu_Qpf_Ctrl']/row['MTB\\fft_pos_Vmag_pu']
-                        
-                IqFFC = guideFFC(Upos=row['MTB\\fft_pos_Vmag_pu'], Iq0 = Iq0, DK=DK, DSO=DSO)
-                    
-                guideData.loc[i, 'Iq_pu_FFC_Inst'] = IqFFC                                     
-            
-            # Change LPF setting for Iq
-            trise_FFC = 0.025                                                   # Rise time [s]
-            fc_FFC = 0.35/trise_FFC                                             # Cut-off frequency [Hz]
+        if 'FRT' in CaseName or 'Fault' in CaseName or 'support' in CaseName:
+            V_EPS = 1e-6
+            V_HYS = 0.01  # 1% voltage hysteresis for robust FRT state
+            IN_FRT = False
 
-            guideData['Iq_pu_FFC'] = guideLPF(guideData['Iq_pu_FFC_Inst'], fc_FFC, 1/Ts)            
+            # Select Q signal used to derive pre-fault Iq0
+            if Qmode == 'Q' or (Qmode == 'Default' and Qdefault == 'Q'):
+                Q0 = guideData['Q_pu_Q_Ctrl']
+            elif Qmode == 'Q(U)' or (Qmode == 'Default' and Qdefault == 'Q(U)'):
+                Q0 = guideData['Q_pu_QU_Ctrl'] if 'Q_pu_QU_Ctrl' in guideData.columns else guideData['Q_pu_QU_Inst']
+            elif Qmode == 'PF' or (Qmode == 'Default' and Qdefault == 'PF'):
+                Q0 = guideData['Q_pu_Qpf_Ctrl']
+            else:
+                Q0 = pd.Series(0.0, index=guideData.index)
+
+            # Initialize Iq0 from first sample (safe fallback)
+            _U0 = float(guideData['MTB\\fft_pos_Vmag_pu'].iloc[0])
+            U0 = max(_U0, V_EPS) if np.isfinite(_U0) else 1.0
+            Iq0 = float(Q0.iloc[0]) / U0
+
+            guideData['Iq_pu_FFC_Inst'] = 0.0
+            for i, row in guideData.iterrows():
+                Upos = row['MTB\\fft_pos_Vmag_pu']
+                if not np.isfinite(Upos):
+                    guideData.loc[i, 'Iq_pu_FFC_Inst'] = Iq0
+                    continue
+
+                # FRT state with hysteresis
+                if not IN_FRT and Upos < vposFrtLimit:
+                    IN_FRT = True
+                elif IN_FRT and Upos > (vposFrtLimit + V_HYS):
+                    IN_FRT = False
+
+                # Update Iq0 only outside FRT
+                if not IN_FRT:
+                    U0 = max(Upos, V_EPS)
+                    Iq0 = Q0.loc[i] / U0
+
+                guideData.loc[i, 'Iq_pu_FFC_Inst'] = guideFFC(Upos=Upos, Iq0=Iq0, DK=DK, DSO=DSO)
+
+            trise_FFC = 0.025                                                   # Rise time [s]
+            fc_FFC = 0.35 / trise_FFC                                           # Cut-off frequency [Hz]
+            guideData['Iq_pu_FFC'] = guideLPF(guideData['Iq_pu_FFC_Inst'], fc_FFC, 1/Ts)
             guideFigs.append('Ireactive')
-            guideSignals.append('Iq_pu_FFC')  
+            guideSignals.append('Iq_pu_FFC')
 
         returnDict = {'figs': guideFigs, 'signals': guideSignals, 'data': guideData}
             
@@ -235,15 +291,19 @@ def guideDelay(x, Td, Ts):
         delayed signal
     '''
     delay_samples = int(round(Td/Ts))
-    b = np.zeros(delay_samples + 1)
-    b[delay_samples] = 1    # For a pure delay of N samples, b = [0, 0, ..., 0, 1] (where 1 is at index N)
-    a = np.array([1.0])     # For an FIR filter (pure delay), a = [1]
-
-    if delay_samples == 0:
+    if delay_samples <= 0:
         return x  # No delay needed, return original signal
+
+    x_arr = np.asarray(x)
+    y = np.empty_like(x_arr)
     
-    # Apply the filter to the input signal
-    return lfilter(b, a, x)
+    # Hold initial value before delayed samples become available
+    y[:delay_samples] = x_arr[0]
+    y[delay_samples:] = x_arr[:-delay_samples]
+
+    if isinstance(x, pd.Series):
+        return pd.Series(y, index=x.index)
+    return y
 
 
 def guidePramp(Pref, Pn, Tstep, Pstep, t):
@@ -579,3 +639,41 @@ def guideFFC(Upos, Iq0, DK, DSO):
     return IqFFC
 
 
+def guideSIPS(Pref, SIPSg, step_setpoints=None):
+    '''
+    Decode MTB SIPS bitfield and return commanded active power ceiling.
+
+    Bit 0: reserved
+    Bit 1..N: SIPS steps
+    Default Energinet steps:
+      1 -> 0.70 pu
+      2 -> 0.50 pu
+      3 -> 0.40 pu
+      4 -> 0.25 pu
+      5 -> 0.00 pu
+
+    If multiple steps are active, the highest reduction is used
+    (i.e., lowest remaining power setpoint among active bits).
+    '''
+    if step_setpoints is None:
+        step_setpoints = {1: 0.70, 2: 0.50, 3: 0.40, 4: 0.25, 5: 0.00}
+
+    pref = np.asarray(Pref, dtype=float)
+    g = np.asarray(SIPSg)
+    g = np.nan_to_num(g, nan=0.0)
+    g = np.rint(g).astype(np.int64)
+
+    best_setpoint = np.ones_like(pref, dtype=float)
+    any_active = np.zeros_like(pref, dtype=bool)
+
+    for bit, setpoint in step_setpoints.items():
+        active = ((g >> bit) & 1) == 1
+        best_setpoint = np.where(active, np.minimum(best_setpoint, setpoint), best_setpoint)
+        any_active = np.logical_or(any_active, active)
+
+    limit = np.where(any_active, best_setpoint, 1.0)
+    sips_pref = np.minimum(pref, limit)
+
+    if isinstance(Pref, pd.Series):
+        return pd.Series(sips_pref, index=Pref.index)
+    return sips_pref
