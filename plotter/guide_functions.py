@@ -66,7 +66,7 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             guideFigs.append('Ppoc')
             guideSignals.append('P_pu_PoC_Ramp')
         
-        # "Advance" (multi-step) Active Power Ramping cases (with limited Pavailabale cases)
+        # "Advance" (multi-step) Active Power Ramping cases (with limited Pavailable cases)
         elif 'Pref-change' in CaseName or 'Pavail_step' in CaseName or 'Pavail_variation' in CaseName:
             guideData['P_pu_PoC_Ramp'] = guideData['MTB\\mtb_s_pref_pu'].clip(upper=guideData['MTB\\mtb_s_pavail_pu']) # Create the active power reference signal clipped to the available power to 'populate' below
             guideData['P_pu_PoC_Ramp'] = guidePramp2(Pref=guideData['P_pu_PoC_Ramp'], Pn=Pn, Pavail=guideData['MTB\\mtb_s_pavail_pu'], Ts=Ts, P=guideData['P_pu_PoC_Ramp'])
