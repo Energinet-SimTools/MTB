@@ -111,7 +111,9 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             # Decode SIPS command -> active power ceiling (pu)
             guideData['P_pu_PoC_SIPS_ref'] = guideSIPS(
                 Pref=guideData['MTB\\mtb_s_pref_pu'],
-                SIPSg=guideData['MTB\\mtb_s_sips_g']
+                SIPSg=guideData['MTB\\mtb_s_sips_g'],
+                Pn=Pn,
+                Ts=Ts
             )
 
             # 0 s delay + ~1 Hz response
@@ -639,7 +641,7 @@ def guideFFC(Upos, Iq0, DK, DSO):
     return IqFFC
 
 
-def guideSIPS(Pref, SIPSg, step_setpoints=None):
+def guideSIPS(Pref, SIPSg, Pn, Ts, step_setpoints=None):
     '''
     Decode MTB SIPS bitfield and return commanded active power ceiling.
 
@@ -654,6 +656,7 @@ def guideSIPS(Pref, SIPSg, step_setpoints=None):
 
     If multiple steps are active, the highest reduction is used
     (i.e., lowest remaining power setpoint among active bits).
+    Ramp down is instantaneous; ramp up is limited to min(0.2 pu/min, 60 MW/min).
     '''
     if step_setpoints is None:
         step_setpoints = {1: 0.70, 2: 0.50, 3: 0.40, 4: 0.25, 5: 0.00}
@@ -672,7 +675,16 @@ def guideSIPS(Pref, SIPSg, step_setpoints=None):
         any_active = np.logical_or(any_active, active)
 
     limit = np.where(any_active, best_setpoint, 1.0)
-    sips_pref = np.minimum(pref, limit)
+    sips_instant = np.minimum(pref, limit)
+
+    # Fast ramp down, slow ramp up limited to min(0.2 pu/min, 60 MW/min)
+    m = min(0.2, 60.0 / Pn) / 60.0  # pu/s
+    sips_pref = sips_instant.copy()
+    for k in range(1, len(sips_pref)):
+        if sips_instant[k] < sips_pref[k - 1]:  # SIPS reduction: apply instantly
+            sips_pref[k] = sips_instant[k]
+        else:                                     # SIPS release: ramp up slowly
+            sips_pref[k] = min(sips_pref[k - 1] + m * Ts, sips_instant[k])
 
     if isinstance(Pref, pd.Series):
         return pd.Series(sips_pref, index=Pref.index)
