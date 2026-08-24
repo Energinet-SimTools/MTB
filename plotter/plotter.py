@@ -748,7 +748,7 @@ def create_html(plots: List[go.Figure], goCursorList: List[go.Figure], path: str
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="mtb.css"    
+    <link rel="stylesheet" href="mtb.css">    
   </head>
   <body>
 	<div class="navbar">
