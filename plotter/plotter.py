@@ -26,7 +26,7 @@ from cursor_functions import setupCursorDataFrame, addCursorMetrics
 from guide_functions import genGuideResults
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
-import warnings
+import warnings, logging
 
 try:
     LOG_FILE = open('plotter.log', 'w')
@@ -39,6 +39,10 @@ np.seterr(divide='ignore', invalid='ignore')
 
 # To suppress openpyxl warning messages
 warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")      
+
+# Mute the specific background browser warnings from Kaleido v1.x
+logging.getLogger("choreographer.browser_async").setLevel(logging.ERROR)
+logging.getLogger("choreographer.channel").setLevel(logging.ERROR)
 
 # To store the original built-in print so we can still use it
 _builtin_print = print
@@ -580,8 +584,7 @@ def create_image_plots(config, figureList, figurePath, imagePlots):
         # Save the combined plot as a single image
         combined_plot.write_image(f'{figurePath}.{config.imageFormat}',
                                   height=500 * len(imagePlots),
-                                  width=2000,
-                                  engine="kaleido")
+                                  width=2000)
 
     else:
         # Combine all figures into a grid when nColumns > 1
@@ -593,7 +596,7 @@ def create_image_plots(config, figureList, figurePath, imagePlots):
         imagePlots[0].write_image(f'{figurePath}.{config.imageFormat}',
                                   height=500 * ceil(len(figureList) / config.imageColumns),
                                   width=700 * config.imageColumns,
-                                  engine="kaleido" )  # type: ignore
+                                  engine="kaleido")  # type: ignore
 
 
 def setupPlotLayout(rankName, config, figureList, htmlPlots, imagePlots, rank):
