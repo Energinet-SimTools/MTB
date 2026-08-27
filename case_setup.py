@@ -344,7 +344,7 @@ def setup(casesheetPath : str, pscad : bool, pfEncapsulation : Optional[si.PFint
     # Custom signals
     mtb_s.append(signal('mtb_s_1', measFile = True))
     mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:15') #Signal_1_t0 
-    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:14') #Signal_1_t0   # TO DO: Missing to add MtrfrGnd0 to the initializer_qdsl
+    mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:14') #Signal_1_t0
     mtb_s.append(signal('mtb_s_2', measFile = True))
     mtb_s[-1].addPFsub_S0('initializer_script.ComDpl', 'IntExpr:16') #Signal_2_t0
     mtb_s[-1].addPFsub_S0('initializer_qdsl.ElmQdsl', 'initVals:15') #Signal_2_t0
