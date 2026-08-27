@@ -715,14 +715,19 @@ def guideSIPS2(Pref, SIPSg, Pn, Ts, Td=1.0, t_ramp=10.0, step_setpoints=None):
 
     sips_delayed = np.asarray(guideDelay(sips_instant, Td, Ts))
 
-    m_down = 1.0 / t_ramp                   # pu/s: 1 pu drop takes t_ramp seconds
-    m_up = min(0.2, 60.0 / Pn) / 60.0      # pu/s
+    ramp_time = max(t_ramp - Td, Ts)        # seconds to complete ramp after delay elapses
+    m_up = min(0.2, 60.0 / Pn) / 60.0       # pu/s
 
+    m_down = 0.0
     sips_pref = sips_delayed.copy()
     for k in range(1, len(sips_pref)):
-        if sips_delayed[k] < sips_pref[k - 1]:  # Ramp down linearly
+        if sips_delayed[k] < sips_delayed[k - 1]:   # New SIPS step: recompute rate to finish in ramp_time
+            m_down = (sips_pref[k - 1] - sips_delayed[k]) / ramp_time
             sips_pref[k] = max(sips_pref[k - 1] - m_down * Ts, sips_delayed[k])
-        else:                                     # Ramp up slowly
+        elif sips_pref[k - 1] > sips_delayed[k]:    # Still ramping down to current target
+            sips_pref[k] = max(sips_pref[k - 1] - m_down * Ts, sips_delayed[k])
+        else:                                       # Ramp up slowly
+            m_down = 0.0
             sips_pref[k] = min(sips_pref[k - 1] + m_up * Ts, sips_delayed[k])
 
     if isinstance(Pref, pd.Series):
