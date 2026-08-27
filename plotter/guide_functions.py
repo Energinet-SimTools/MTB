@@ -121,13 +121,12 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             guideData['P_pu_PoC'] = guideLPF(guideData['P_pu_PoC_SIPS_ref'], fc_sips_fast, 1 / Ts)
             guideData.loc[guideData['time'] < tThresh, 'P_pu_PoC'] = P0
 
-            # 1 s delay + ~0.1 Hz response (10 s)
-            Td_sips = 1.0
-            fc_sips_slow = 0.1
-            guideData['P_pu_PoC_1s'] = guideLPF(
-                guideDelay(guideData['P_pu_PoC_SIPS_ref'], Td_sips, Ts),
-                fc_sips_slow,
-                1 / Ts
+            # 1 s delay + 10 s linear downramp
+            guideData['P_pu_PoC_1s'] = guideSIPS2(
+                Pref=guideData['MTB\\mtb_s_pref_pu'],
+                SIPSg=guideData['MTB\\mtb_s_sips_g'],
+                Pn=Pn,
+                Ts=Ts
             )
             guideData.loc[guideData['time'] < tThresh, 'P_pu_PoC_1s'] = P0
 
@@ -640,7 +639,6 @@ def guideFFC(Upos, Iq0, DK, DSO):
         
     return IqFFC
 
-
 def guideSIPS(Pref, SIPSg, Pn, Ts, step_setpoints=None):
     '''
     Decode MTB SIPS bitfield and return commanded active power ceiling.
@@ -685,6 +683,47 @@ def guideSIPS(Pref, SIPSg, Pn, Ts, step_setpoints=None):
             sips_pref[k] = sips_instant[k]
         else:                                     # SIPS release: ramp up slowly
             sips_pref[k] = min(sips_pref[k - 1] + m * Ts, sips_instant[k])
+
+    if isinstance(Pref, pd.Series):
+        return pd.Series(sips_pref, index=Pref.index)
+    return sips_pref
+
+
+def guideSIPS2(Pref, SIPSg, Pn, Ts, Td=1.0, t_ramp=10.0, step_setpoints=None):
+    '''
+    Like guideSIPS but with a Td-second delay before responding to reductions,
+    followed by a linear downramp at 1/t_ramp pu/s. Ramp up at min(0.2 pu/min, 60 MW/min).
+    '''
+    if step_setpoints is None:
+        step_setpoints = {1: 0.70, 2: 0.50, 3: 0.40, 4: 0.25, 5: 0.00}
+
+    pref = np.asarray(Pref, dtype=float)
+    g = np.asarray(SIPSg)
+    g = np.nan_to_num(g, nan=0.0)
+    g = np.rint(g).astype(np.int64)
+
+    best_setpoint = np.ones_like(pref, dtype=float)
+    any_active = np.zeros_like(pref, dtype=bool)
+
+    for bit, setpoint in step_setpoints.items():
+        active = ((g >> bit) & 1) == 1
+        best_setpoint = np.where(active, np.minimum(best_setpoint, setpoint), best_setpoint)
+        any_active = np.logical_or(any_active, active)
+
+    limit = np.where(any_active, best_setpoint, 1.0)
+    sips_instant = np.minimum(pref, limit)
+
+    sips_delayed = np.asarray(guideDelay(sips_instant, Td, Ts))
+
+    m_down = 1.0 / t_ramp                   # pu/s: 1 pu drop takes t_ramp seconds
+    m_up = min(0.2, 60.0 / Pn) / 60.0      # pu/s
+
+    sips_pref = sips_delayed.copy()
+    for k in range(1, len(sips_pref)):
+        if sips_delayed[k] < sips_pref[k - 1]:  # Ramp down linearly
+            sips_pref[k] = max(sips_pref[k - 1] - m_down * Ts, sips_delayed[k])
+        else:                                     # Ramp up slowly
+            sips_pref[k] = min(sips_pref[k - 1] + m_up * Ts, sips_delayed[k])
 
     if isinstance(Pref, pd.Series):
         return pd.Series(sips_pref, index=Pref.index)
