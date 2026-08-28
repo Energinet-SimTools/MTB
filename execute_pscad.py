@@ -59,7 +59,8 @@ if pythonPath:
 
 from datetime import datetime
 import shutil
-import psutil #type: ignore
+import psutil 
+import getpass
 from typing import List, Optional
 import pandas as pd
 import warnings
@@ -78,8 +79,15 @@ except ImportError:
     sys.exit(1)
 
 def connectPSCAD() -> mhi.pscad.PSCAD:
-    pid = os.getpid()
-    ports = [con.laddr.port for con in psutil.net_connections() if con.status == psutil.CONN_LISTEN and con.pid == pid] #type: ignore
+    ports = []
+    my_user = getpass.getuser()
+
+    for p in psutil.process_iter(['pid', 'name', 'username']):
+        if (p.info['name'] and p.info['name'].lower() == 'pscad.exe'
+                and p.info['username'] and p.info['username'].split('\\')[-1] == my_user):
+            for c in p.net_connections(kind='tcp'):
+                if c.status == 'LISTEN':
+                    ports.append(c.laddr.port)
 
     if len(ports) == 0: #type: ignore
         print('No PSCAD listening ports found!\n')
@@ -294,7 +302,7 @@ def main():
     print('execute_pscad.py started at:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), '\n')
     
     pscad = connectPSCAD()
-    
+
     # If the script is not executed from within PSCAD, run PSCAD as an external client
     if pscad is None: 
         runningAsEternalClient = True
