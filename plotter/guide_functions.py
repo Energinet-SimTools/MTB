@@ -359,9 +359,9 @@ def guidePramp2(Pref, Pn, Pavail, Ts, P):
     m = m/60              # Convert pu/min to pu/s
        
     # Convert Pandas Series to Numpy Array for added speed in doing difference equations below
-    Pref_array = np.asarray(Pref)
-    Pavail_array = np.asarray(Pavail)
-    P_array = np.asarray(P)
+    Pref_array = np.array(Pref, dtype=float)
+    Pavail_array = np.array(Pavail, dtype=float)
+    P_array = np.array(P, dtype=float)
     
     for k in range(1, len(P)):
         if np.abs(Pref_array[k] - P_array[k-1]) > PThresh:
@@ -418,11 +418,11 @@ def guideLFSMRamp(Pref, Pn, Pavail, Ts, f, fTdLpf, P, DK, FSM, s_fsm, db):
     UPPER = False
     
     # Convert Pandas Series to Numpy Array for added speed in doing difference equations below
-    Pref_array = np.asarray(Pref)
-    Pavail_array = np.asarray(Pavail)
-    P_array = np.asarray(P)
-    f_array = np.asarray(f)
-    fTdLpf_array = np.asarray(fTdLpf)
+    Pref_array = np.array(Pref, dtype=float)
+    Pavail_array = np.array(Pavail, dtype=float)
+    P_array = np.array(P, dtype=float)
+    f_array = np.array(f, dtype=float)
+    fTdLpf_array = np.array(fTdLpf, dtype=float)
     
     Pref=Pref_array[0]
     for k in range(1, len(P)):
