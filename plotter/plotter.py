@@ -43,6 +43,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 # Mute the specific background browser warnings from Kaleido v1.x
 logging.getLogger("choreographer.browser_async").setLevel(logging.ERROR)
 logging.getLogger("choreographer.channel").setLevel(logging.ERROR)
+logging.getLogger("choreographer.utils._tmpfile").setLevel(logging.ERROR)
 
 # To store the original built-in print so we can still use it
 _builtin_print = print
