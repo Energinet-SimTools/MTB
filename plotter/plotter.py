@@ -595,8 +595,7 @@ def create_image_plots(config, figureList, figurePath, imagePlots):
         )
         imagePlots[0].write_image(f'{figurePath}.{config.imageFormat}',
                                   height=500 * ceil(len(figureList) / config.imageColumns),
-                                  width=700 * config.imageColumns,
-                                  engine="kaleido")  # type: ignore
+                                  width=700 * config.imageColumns)  # type: ignore
 
 
 def setupPlotLayout(rankName, config, figureList, htmlPlots, imagePlots, rank):
