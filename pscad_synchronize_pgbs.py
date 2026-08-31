@@ -35,48 +35,71 @@ from typing import List, Dict, Tuple, Optional
 # SIGNAL PATH UTILITIES
 # ============================================================
 
-def _buildParentMap(proj) -> Dict[str, str]:
-    """Build a map of {child_canvas -> parent_canvas} for a project."""
-    parent_map = {}
-    for defn_name in proj.definitions():
-        try:
-            canvas = proj.canvas(defn_name)
-            for comp in canvas.components():
-                if hasattr(comp, 'defn_name') and isinstance(comp.defn_name, tuple):
-                    child_project, child_defn = comp.defn_name
-                    if child_project == proj.name:
-                        if child_defn not in parent_map:
-                            parent_map[child_defn] = defn_name
-        except Exception:
-            pass
-    return parent_map
-
-
-def _buildInstanceNameMap(proj) -> Dict[str, str]:
+def _parseProjectXML(proj) -> Tuple[Dict[str, str], Dict[str, str], List[Tuple[int, str, str, bool]]]:
     """
-    Build a map of {defn_name -> instance_name} for components
-    that have a 'Name' parameter different from their definition name.
-    e.g. {'unit_meas': '$Unit$', 'unit_meas_1': '$Unit$_2', 'unit_meas_2': '$Unit$_2'}
+    Parses the project XML file once to extract everything needed to resolve PGB signal
+    paths, instead of walking the canvas/component hierarchy via PSCAD automation calls
+    (proj.canvas(), canvas.components(), pgb.parent, pgb.parameters()). Each automation
+    call is a remote round-trip, which becomes very slow (minutes instead of seconds)
+    when connected to PSCAD over an external automation link rather than running inside
+    PSCAD's embedded Python console.
+
+    Returns:
+        parent_map: {child_defn -> parent_defn} (canvas hierarchy, by definition name)
+        instance_map: {defn_name -> instance_name} for components with a custom 'Name' param
+        pgb_records: [(id, signal_name, parent_defn_name, is_disabled), ...] for all master:pgb components
     """
-    instance_map = {}
+    parent_map: Dict[str, str] = {}
+    instance_map: Dict[str, str] = {}
+    pgb_records: List[Tuple[int, str, str, bool]] = []
+
     try:
         tree = ET.parse(proj.filename)
         root = tree.getroot()
-        for elem in root.iter('User'):
-            defn = elem.get('defn', '')
-            if ':' in defn:
-                defn_proj, defn_name = defn.split(':', 1)
-                if defn_proj == proj.name:
-                    # Look for a 'Name' parameter
-                    for param in elem.iter('param'):
+
+        # Definition elements live under a <definitions> wrapper (not direct children of <project>),
+        # so use iter() to find them regardless of nesting depth. Skip StationDefn (e.g. 'DS'),
+        # which wraps Main for multiple-run purposes and is not part of the real canvas hierarchy.
+        for defn_elem in root.iter('Definition'):
+            if defn_elem.get('classid') != 'UserCmpDefn':
+                continue
+            parent_name = defn_elem.get('name', '')
+
+            for user_elem in defn_elem.iter('User'):
+                defn_attr = user_elem.get('defn', '')
+
+                if defn_attr == 'master:pgb':
+                    comp_id = int(user_elem.get('id'))
+                    is_disabled = user_elem.get('disable', 'false').lower() == 'true'
+                    signal_name = ''
+                    for param in user_elem.iter('param'):
                         if param.get('name') == 'Name':
-                            instance_name = param.get('value', '')
-                            if instance_name and instance_name != defn_name:
-                                instance_map[defn_name] = instance_name
+                            signal_name = param.get('value', '')
                             break
+                    pgb_records.append((comp_id, signal_name, parent_name, is_disabled))
+                    continue
+
+                if ':' not in defn_attr:
+                    continue
+
+                child_project, child_defn = defn_attr.split(':', 1)
+                if child_project != proj.name:
+                    continue
+
+                if child_defn not in parent_map:
+                    parent_map[child_defn] = parent_name
+
+                # Look for a 'Name' parameter identifying a custom instance name
+                for param in user_elem.iter('param'):
+                    if param.get('name') == 'Name':
+                        instance_name = param.get('value', '')
+                        if instance_name and instance_name != child_defn:
+                            instance_map.setdefault(child_defn, instance_name)
+                        break
     except Exception as e:
-        print('Warning: Could not build instance name map: ' + str(e))
-    return instance_map
+        print('Warning: Could not parse project XML: ' + str(e))
+
+    return parent_map, instance_map, pgb_records
 
 
 def _getCanvasPath(canvas_name: str, parent_map: Dict[str, str]) -> str:
@@ -194,17 +217,16 @@ def getPGBStatus(proj) -> Dict[str, List[Tuple[str, str, bool, object]]]:
     Returns:
         Dict of {canvas_path: [(signal_name, signal_path, is_disabled, pgb_component), ...]}
     """
-    parent_map = _buildParentMap(proj)
-    instance_map = _buildInstanceNameMap(proj)
-    disabled_ids = _getDisabledIds(proj)
-    pgb_components = proj.find_all('master:pgb')
+    parent_map, instance_map, pgb_records = _parseProjectXML(proj)
+
+    # Single remote call, just to get component handles for later enable()/disable() calls
+    pgb_components = {comp.iid: comp for comp in proj.find_all('master:pgb')}
 
     canvas_path_dict = {}
-    for pgb in pgb_components:
-        canvas_str = str(pgb.parent)
-        canvas_name = canvas_str.split(':')[-1].strip('")')
-        signal_name = pgb.parameters().get('Name', '')
-        is_disabled = pgb.iid in disabled_ids
+    for comp_id, signal_name, canvas_name, is_disabled in pgb_records:
+        pgb = pgb_components.get(comp_id)
+        if pgb is None:
+            continue  # Guard against XML/runtime state mismatch
 
         # Build canvas path using definition names (for hierarchy traversal)
         canvas_path_defn = _getCanvasPath(canvas_name, parent_map)
