@@ -311,7 +311,7 @@ def main():
         runningAsEternalClient = False
         
     #Update PGB names for all unit measurement components
-    updateUMs(pscad, useLegacyUMSignalNaming)
+    updateUMs(pscad, useLegacyUMSignalNaming, verbose=False)
 
     #Disable all unused PGBs not specified in the plotter's figureSetup.csv if required 
     if disableAllUnusedPGBs:
