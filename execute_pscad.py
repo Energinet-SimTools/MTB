@@ -1,5 +1,5 @@
 '''
-Executes the Powerplant model testbench in PSCAD.
+Executes the Model Testbench (MTB) test cases for a grid-connected PSCAD plant model.
 '''
 from __future__ import annotations 
 import os
@@ -81,14 +81,17 @@ except ImportError:
 def connectPSCAD() -> mhi.pscad.PSCAD:
     ports = []
     my_user = getpass.getuser()
-
+    
+    print(f'Checking for running PSCAD instances for user: {my_user}\n')
+    
     for p in psutil.process_iter(['pid', 'name', 'username']):
         if (p.info['name'] and p.info['name'].lower() == 'pscad.exe'
                 and p.info['username'] and p.info['username'].split('\\')[-1] == my_user):
             for c in p.net_connections(kind='tcp'):
                 if c.status == 'LISTEN':
                     ports.append(c.laddr.port)
-
+                    print(f'Found PID {p.info["pid"]} listening on port {c.laddr.port}\n')
+    
     if len(ports) == 0: #type: ignore
         print('No PSCAD listening ports found!\n')
         return None
