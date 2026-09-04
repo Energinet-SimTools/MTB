@@ -8,7 +8,8 @@ MTB is intended to help facility owners and model providers evaluate simulation 
 > Using MTB is not a guarantee of model compliance. The plant owner remains responsible for ensuring that models comply with the requirements applicable at any time.
 
 <p align="center">
-	<img src="https://github.com/user-attachments/assets/2264d07d-e99f-46ab-bbb1-4dceddcc614b" width="800" height="210" alt="MTB workflow from testcase workbook to simulation and plotting">
+	<!-- <img src="https://github.com/user-attachments/assets/2264d07d-e99f-46ab-bbb1-4dceddcc614b" width="800" height="210" alt="MTB workflow from testcase workbook to simulation and plotting"> -->
+	<img width="1324" height="1188" alt="image" src="https://github.com/user-attachments/assets/3c3156c3-f606-440a-aff6-ad152179422a" />
 </p>
 
 ## Workflow
