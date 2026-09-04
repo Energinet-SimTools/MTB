@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PSCAD OOM recovery: `recover_psout_files.py` script to rename and recover `.psout` files after a PSCAD crash (#211, #213)
 - CSV export of case rank and task ID for OOM recovery tracking (#211, #213)
 - MTB can now be placed in a PSCAD subfolder rather than on the main canvas (#203)
-- PGB (Probe Group Block) synchronization with `figureSetup.csv` via `pscad_synchronize_pgbs.py`, including automatic disabling of unused signals (#273, #274)
+- PGB (Plotter Group Block) synchronization with `figureSetup.csv` via `pscad_synchronize_pgbs.py`, including automatic disabling of unused signals (#273, #274)
 - PSCAD tracing and state animation disabled by default; only in-use channels enabled (#263)
 
 #### PowerFactory
