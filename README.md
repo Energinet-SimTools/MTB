@@ -1,43 +1,87 @@
-
 # MTB (Model Test Bench)
 
-Connecting new electricity generation and demand facilities to Denmark's public transmission and distribution systems requires thorough grid compliance studies using both RMS/PDT and EMT plant-level models. The Danish TSO, Energinet, mandates that RMS/PDT models be created in [DIgSILENT PowerFactory](https://www.digsilent.de/en/powerfactory.html)  and EMT models in [PSCAD](https://www.pscad.com/). Before any facility can begin operation, all electrically significant plants must have their RMS and EMT models reviewed and approved by Energinet to ensure both grid compliance and model quality. Conducting the necessary studies to demonstrate compliance and validate model quality through comparisons of RMS and EMT models can be both time-consuming and prone to error.
+**MTB** (**M**odel **T**est **B**ench) automates grid compliance simulation studies in both [DIgSILENT PowerFactory](https://www.digsilent.de/en/powerfactory.html) and [PSCAD](https://www.pscad.com/), with external plotting and comparison of RMS and EMT results.
 
-The MTB (Model Test Bench) simplifies and automates this process by enabling seamless grid connection studies across PowerFactory and PSCAD environments. Energinet relies on the MTB for all grid connection studies and strongly recommends its use to all connecting parties. By using the MTB, developers can conduct studies under the exact same conditions as Energinet, ensuring they achieve the same results that Energinet will evaluate.
+MTB is intended to help facility owners and model providers evaluate simulation model behaviour in the context of Danish grid-code requirements and Energinet simulation model requirements. It includes predefined case sets for RfG, DCC, unit testing, co-located generation/demand cases, and custom user-defined studies.
 
-The workflow is simple:
+> [!IMPORTANT]
+> Using MTB is not a guarantee of model compliance. The plant owner remains responsible for ensuring that models comply with the requirements applicable at any time.
 
-1. **Define the Required Studies** in the provided Excel sheet. The MTB is preconfigured for the studies required in most grid connection cases in Denmark but is also adaptable to all regions following the EU RfG. Modifying or extending the study case set is straightforward.
-2. **Integrate the PSCAD MTB Component** into the plant's PSCAD model.
-3. **Integrate the PowerFactory MTB Component** into the plant's PowerFactory model.
-4. **Execute Simulations** using the MTB Python scripts.
-5. **Visualize the Results** with the included plotter tool.
+<p align="center">
+	<img src="https://github.com/user-attachments/assets/2264d07d-e99f-46ab-bbb1-4dceddcc614b" width="800" height="210" alt="MTB workflow from testcase workbook to simulation and plotting">
+</p>
 
-For the latest release notes, please visit the [Releases page](https://github.com/Energinet-AIG/MTB/releases). Learn more about the regulations for grid connection of new facilities in Denmark: [Danish](https://energinet.dk/regler/el/nettilslutning) or [English](https://en.energinet.dk/rules-regulations-conditions-and-methods/electricity-rules-conditions-and-methods/).
+## Workflow
 
-![96](https://github.com/user-attachments/assets/6ce6746c-83b6-4d3f-a433-71c7ce5409de)
-*Example comparative study between RMS (red) and EMT (blue) models.*
-## Getting Started
+1. Configure the testcase workbook.
+2. Set up the MTB in PowerFactory and/or PSCAD.
+3. Execute the selected simulation cases.
+4. Plot and compare RMS and EMT results.
+5. Use guide curves, cursor metrics, and utility scripts where relevant.
 
-To start using the MTB, refer to the Quickstart Guides available on the [MTB wiki Home page](https://github.com/Energinet-AIG/MTB/wiki) on GitHub. These guides provide instructions on using the Casesheet, PowerFactory, PSCAD, and the plotter tool.
+## HTML Output Example
+
+<p align="left">
+	<img width="1000" alt="Zoomed view of MTB HTML plot output features" src="https://github.com/user-attachments/assets/522c623e-e778-41ec-a800-d4f807ae7a46" />
+</p>
+
+The generated HTML reports include:
+
+1. **Previous Rank** - navigates to the previous rank in the study, with wraparound.
+2. **Next Rank** - navigates to the next rank in the study, with wraparound.
+3. **More Ranks** - drop-down list for faster navigation between ranks.
+4. **Rank Number and Title** - shows the rank number and case title from `testcases.xlsx`.
+5. **Subsection Hyperlinks** - links to Figures, Cursors, and Source Data.
+6. **Figures subsection** - contains the result plot figures.
+7. **Plot Figure Hyperlinks** - links to each plot figure on the page.
+8. **Plot Figure Title** - taken from `figureSetup.csv`.
+9. **Plot Figure Units** - taken from `figureSetup.csv`.
+10. **Plot Figure Legend** - lists the plotted signals. Click a legend item to hide or show the corresponding trace.
+11. **Plotly Buttons** - standard Plotly controls for downloading, zooming, panning, autoscaling, and resetting axes.
+
+## Documentation
+
+| Section | Page                                                                                 | Purpose                                                                                         |
+| ------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| 1       | [Quickstart Testcases Workbook Guide](wiki/1.-Quickstart-Testcases-Workbook-Guide.md) | Configure `testcases.xlsx`, case sheets, settings, and event types.                           |
+| 2       | [Quickstart PowerFactory Guide](wiki/2.-Quickstart-PowerFactory-Guide.md)             | Set up and execute MTB cases in PowerFactory.                                                   |
+| 3       | [Quickstart PSCAD Guide](wiki/3.-Quickstart-PSCAD-Guide.md)                           | Set up and execute MTB cases in PSCAD.                                                          |
+| 4       | [Quickstart Plotter Guide](wiki/4.-Quickstart-Plotter-Guide.md)                       | Configure and run the MTB plotter.                                                              |
+| 5       | [Quickstart Guide Curve Generation](wiki/5.-Quickstart-Guide-Curve-Generation.md)     | Understand analytical guide curves generated by the plotter.                                    |
+| 6       | [Quickstart Cursor Metrics](wiki/6.-Quickstart-Cursor-Metrics.md)                     | Configure and interpret cursor metric tables.                                                   |
+| 7       | [Quickstart Python Utility Scripts](wiki/7.-Quickstart-Python-Utility-Scripts.md)     | Use helper scripts for model checks, data extraction, `.psout` inspection, and recovery.      |
+| A       | [Working with .psout files](wiki/A.-Working-with-.psout-files.md)                     | Use PSCAD `.psout` files with MHI tools, MTB helper functions, and conversion/listing scripts. |
+
+Example PowerFactory and PSCAD setups are available in [setup_examples](setup_examples). These examples demonstrate the MTB setup workflow only; they are not representative of compliant plant models.
 
 ## Requirements
 
-To install all necessary dependencies, run:
+Install the main MTB dependencies from the repository root:
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
+```
+
+The plotter has a separate dependency file:
+
+```bash
+cd plotter
+python -m pip install -r requirements.txt
 ```
 
 ### Tested Environments
 
-- **PowerFactory**: Tested on version 2025 SP4 with Python versions >= 3.11
-- **PSCAD**: Tested on version 5.0.2.0 with Python 3.7.2 (embedded Python) and with Python 3.13 as an external client. Compatibility is only guaranteed with Intel Fortran Compilers.
+- **PowerFactory**: PowerFactory 2025 SP4 with Python >= 3.11.
+- **PSCAD**: PSCAD 5.0.2.0 with embedded Python 3.7.2 or Python 3.13 as an external client. Compatibility is only guaranteed with Intel Fortran compilers.
+
+## Releases
+
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ## Contributing
 
-We welcome contributions! To contribute, please file an issue via the MTB [Issues tab](https://github.com/Energinet-AIG/MTB/issues). You can report bugs, request features, or suggest improvements. Before submitting, please check for any known issues.
+Please use the [Issues tab](https://github.com/Energinet-SimTools/MTB/issues) to report bugs, request features, or suggest improvements.
 
 ## Contact
 
-For inquiries, please contact the Energinet simulation model team: simuleringsmodeller@energinet.dk
+For inquiries, please contact the Energinet simulation model team: [simuleringsmodeller@energinet.dk](mailto:simuleringsmodeller@energinet.dk)
