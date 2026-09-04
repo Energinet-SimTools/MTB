@@ -46,7 +46,7 @@ parser.add_argument('-c', '--compressionType',
                     nargs = '?',          
                     metavar = 'COMPRESSIONTYPE',
                     default = '.csv',
-                    help = 'the output compression type e.g. .zip, .bx2, .gz or .xz')
+                    help = 'the output compression type e.g. .zip, .bz2, .gz or .xz')
 parser.add_argument('-q', '--quiet',
                     action = 'store_true',
                     dest = 'QUIET',
