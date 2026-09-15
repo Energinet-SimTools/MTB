@@ -16,6 +16,7 @@ class ReadConfig:
         parsedConf = cp['config']
         self.resultsDir = parsedConf['resultsDir']
         self.genHTML = parsedConf.getboolean('genHTML')
+        self.sharedXaxis = parsedConf.getboolean('sharedXaxis')
         self.genImage = parsedConf.getboolean('genImage')
         self.genGuide = parsedConf.getboolean('genGuide')
         self.genCursorHTML = parsedConf.getboolean('genCursorHTML')
