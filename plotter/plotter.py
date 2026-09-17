@@ -26,6 +26,7 @@ from cursor_functions import setupCursorDataFrame, addCursorMetrics
 from guide_functions import genGuideResults
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
+from shared_xaxis import shared_xaxis_script
 import warnings, logging
 
 try:
@@ -728,7 +729,7 @@ def create_html(plots: List[go.Figure], goCursorList: List[go.Figure], path: str
 
     source_list += '</div>'
 
-    html_content = create_html_plots(config.htmlColumns, plots, rank, rankName)
+    html_content = create_html_plots(config.htmlColumns, plots, rank, rankName, config.sharedXaxis)
     html_content_cursors = genCursorHTML(config.htmlCursorColumns, goCursorList, rank, rankName) if len(goCursorList) > 0 and config.genCursorHTML else ''
     
     # Create Dropdown Content for the Navbar
@@ -810,7 +811,7 @@ def create_html(plots: List[go.Figure], goCursorList: List[go.Figure], path: str
         file.write(full_html_content)
 
 
-def create_html_plots(columns, plots, rank, rankName):
+def create_html_plots(columns, plots, rank, rankName, sharedXaxis=False):
     if columns in (1,2,3):
         figur_links = '<div style="text-align: left; margin-top: 1px;">'
         figur_links += '<h2><div id="Figures">Figures:</div></h2><br>'
@@ -844,11 +845,14 @@ def create_html_plots(columns, plots, rank, rankName):
                        'displaylogo': True    # Optional: Hide Plotly logo for this plot
                        # Add any other plot-specific config options here
                       }
+        if sharedXaxis:
+            plot_config['doubleClick'] = 'autosize'
         plot_html = plot.to_html(full_html=False,
                                  include_plotlyjs='cdn',
                                  include_mathjax='cdn',
                                  default_width='100%',
-                                 config=plot_config)
+                                 config=plot_config,
+                                 post_script=shared_xaxis_script(len(plots)) if sharedXaxis else None)
         html_content += f'<td><div id="{plot_ref}">' + plot_html + '</div></td>'  # type: ignore
         if ((i+1) % columns) == 0:
             html_content += '</tr>'
@@ -927,4 +931,3 @@ if __name__ == "__main__":
     finally:
         if 'LOG_FILE' in globals() and LOG_FILE:
             LOG_FILE.close()
-            
