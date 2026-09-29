@@ -159,3 +159,9 @@ Kasso*
 Parametrers List*
 Resources/
 *_x86/
+
+# PSCAD build related files
+*.bakx
+*.psmx
+*.if18/
+*.if18_x86/
