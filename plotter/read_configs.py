@@ -44,6 +44,8 @@ def readFigureSetup(filePath: str) -> Dict[int, List[Figure]]:
     with open(filePath, newline='') as setupFile:
         setupReader = csv.DictReader(setupFile, delimiter=';')
         for row in setupReader:
+            if not any(v.strip() for v in row.values() if isinstance(v, str)):
+                continue  # Skip ';;;;' rows left behind when Excel clears a row
             row['exclude_in_case'] = list(
                 set([int(item.strip()) for item in row.get('exclude_in_case', '').split(',') if item.strip() != '']))
             row['include_in_case'] = list(
@@ -110,6 +112,8 @@ def readCursorSetup(filePath: str) -> List[Cursor]:
     with open(filePath, newline='') as setupFile:
         setupReader = csv.DictReader(setupFile, delimiter=';')
         for row in setupReader:
+            if not any(v.strip() for v in row.values() if isinstance(v, str)):
+                continue  # Skip ';;;;' rows left behind when Excel clears a row
             row['cursor_options'] = [CursorType.from_string(str(item.strip())) for item in row.get('cursor_options', '').split(',') if item.strip() != '']
             row['emt_signals'] = [str(item.strip()) for item in row.get('emt_signals', '').split(',') if item.strip() != '']
             row['rms_signals'] = [str(item.strip()) for item in row.get('rms_signals', '').split(',') if item.strip() != '']
