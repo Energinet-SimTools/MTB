@@ -56228,13 +56228,16 @@ CALL COMPONENT_ID(ICALL_NO,$#Component)
 #LOCAL REAL v_neg_p
 #LOCAL REAL i_pos_p
 #LOCAL REAL i_neg_p
+#LOCAL REAL f_track
 UPDATE_FLAG = 0
+f_track = $fin
+IF (TIMEZERO .OR. f_track .LT. 1.0) f_track = 50.0
 
 !VOLTAGES
 !SUBROUTINE FTN180(AMODE,PMODE,HARMS,AAFILT,FREQI,FREQT,INPRE,UPDATE,MAG,PHSANG,DC)
-CALL FTN180(0, 0, 7, 0, 50.0, $fin, $VIN(1), UPDATE_FLAG, a_a, p_a, dc_a)
-CALL FTN180(0, 0, 7, 0, 50.0, $fin, $VIN(2), UPDATE_FLAG, a_b, p_b, dc_b)
-CALL FTN180(0, 0, 7,  0, 50.0, $fin, $VIN(3), UPDATE_FLAG, a_c, p_c, dc_c)
+CALL FTN180(0, 0, 7, 0, 50.0, f_track, $VIN(1), UPDATE_FLAG, a_a, p_a, dc_a)
+CALL FTN180(0, 0, 7, 0, 50.0, f_track, $VIN(2), UPDATE_FLAG, a_b, p_b, dc_b)
+CALL FTN180(0, 0, 7,  0, 50.0, f_track, $VIN(3), UPDATE_FLAG, a_c, p_c, dc_c)
 
 !SUBROUTINE FTSEQN(N,PMODE,MA,MB,MC,PA,PB,PC)
 CALL FTSEQN(7,0, a_a, a_b, a_c, p_a, p_b, p_c)
@@ -56246,9 +56249,9 @@ v_neg_p = p_b(1)
 
 !CURRENTS
 !SUBROUTINE FTN180(AMODE,PMODE,HARMS,AAFILT,FREQI,FREQT,INPRE,UPDATE,MAG,PHSANG,DC)
-CALL FTN180(0, 0, 7, 0, 50.0, $fin, $IIN(1), UPDATE_FLAG, a_a, p_a, dc_a)
-CALL FTN180(0, 0, 7, 0, 50.0, $fin, $IIN(2), UPDATE_FLAG, a_b, p_b, dc_b)
-CALL FTN180(0, 0, 7,  0, 50.0, $fin, $IIN(3), UPDATE_FLAG, a_c, p_c, dc_c)
+CALL FTN180(0, 0, 7, 0, 50.0, f_track, $IIN(1), UPDATE_FLAG, a_a, p_a, dc_a)
+CALL FTN180(0, 0, 7, 0, 50.0, f_track, $IIN(2), UPDATE_FLAG, a_b, p_b, dc_b)
+CALL FTN180(0, 0, 7,  0, 50.0, f_track, $IIN(3), UPDATE_FLAG, a_c, p_c, dc_c)
 
 !SUBROUTINE FTSEQN(N,PMODE,MA,MB,MC,PA,PB,PC)
 CALL FTSEQN(7,0, a_a, a_b, a_c, p_a, p_b, p_c)
@@ -60092,13 +60095,16 @@ CALL COMPONENT_ID(ICALL_NO,$#Component)
 #LOCAL REAL v_neg_p
 #LOCAL REAL i_pos_p
 #LOCAL REAL i_neg_p
+#LOCAL REAL f_track
 UPDATE_FLAG = 0
+f_track = $fin
+IF (TIMEZERO .OR. f_track .LT. 1.0) f_track = 50.0
 
 !VOLTAGES
 !SUBROUTINE FTN180(AMODE,PMODE,HARMS,AAFILT,FREQI,FREQT,INPRE,UPDATE,MAG,PHSANG,DC)
-CALL FTN180(0, 0, 7, 0, 50.0, $fin, $VIN(1), UPDATE_FLAG, a_a, p_a, dc_a)
-CALL FTN180(0, 0, 7, 0, 50.0, $fin, $VIN(2), UPDATE_FLAG, a_b, p_b, dc_b)
-CALL FTN180(0, 0, 7,  0, 50.0, $fin, $VIN(3), UPDATE_FLAG, a_c, p_c, dc_c)
+CALL FTN180(0, 0, 7, 0, 50.0, f_track, $VIN(1), UPDATE_FLAG, a_a, p_a, dc_a)
+CALL FTN180(0, 0, 7, 0, 50.0, f_track, $VIN(2), UPDATE_FLAG, a_b, p_b, dc_b)
+CALL FTN180(0, 0, 7,  0, 50.0, f_track, $VIN(3), UPDATE_FLAG, a_c, p_c, dc_c)
 
 !SUBROUTINE FTSEQN(N,PMODE,MA,MB,MC,PA,PB,PC)
 CALL FTSEQN(7,0, a_a, a_b, a_c, p_a, p_b, p_c)
@@ -60110,9 +60116,9 @@ v_neg_p = p_b(1)
 
 !CURRENTS
 !SUBROUTINE FTN180(AMODE,PMODE,HARMS,AAFILT,FREQI,FREQT,INPRE,UPDATE,MAG,PHSANG,DC)
-CALL FTN180(0, 0, 7, 0, 50.0, $fin, $IIN(1), UPDATE_FLAG, a_a, p_a, dc_a)
-CALL FTN180(0, 0, 7, 0, 50.0, $fin, $IIN(2), UPDATE_FLAG, a_b, p_b, dc_b)
-CALL FTN180(0, 0, 7,  0, 50.0, $fin, $IIN(3), UPDATE_FLAG, a_c, p_c, dc_c)
+CALL FTN180(0, 0, 7, 0, 50.0, f_track, $IIN(1), UPDATE_FLAG, a_a, p_a, dc_a)
+CALL FTN180(0, 0, 7, 0, 50.0, f_track, $IIN(2), UPDATE_FLAG, a_b, p_b, dc_b)
+CALL FTN180(0, 0, 7,  0, 50.0, f_track, $IIN(3), UPDATE_FLAG, a_c, p_c, dc_c)
 
 !SUBROUTINE FTSEQN(N,PMODE,MA,MB,MC,PA,PB,PC)
 CALL FTSEQN(7,0, a_a, a_b, a_c, p_a, p_b, p_c)
