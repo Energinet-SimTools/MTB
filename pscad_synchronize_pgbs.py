@@ -328,9 +328,10 @@ def synchronizePGBsInProject(proj, keep_signals: List[str],
     for canvas_path, signals in canvas_path_dict.items():
         for signal_name, signal_path, is_disabled, pgb in signals:
             in_keep_list = signal_path in keep_signals
+            is_mtb_pgb = signal_path.lower().startswith('mtb\\') or '\\mtb_' in signal_path.lower()
             
             # Case 1: Signal should be Disabled but is currently Enabled
-            if not in_keep_list and not is_disabled:
+            if not in_keep_list and not is_disabled and not is_mtb_pgb:
                 if sync:
                     pgb.disable()
                 disabled_count += 1
@@ -342,7 +343,7 @@ def synchronizePGBsInProject(proj, keep_signals: List[str],
                 enabled_count += 1
             
             # Case 3: Signal is in the list and already Enabled, or not in the list and already Disabled
-            elif in_keep_list:
+            elif in_keep_list or is_mtb_pgb:
                 kept_count += 1
 
     if sync:
