@@ -3,7 +3,7 @@ Minimal script to plot simulation results from PSCAD and PowerFactory.
 '''
 from __future__ import annotations
 from os import listdir, makedirs, remove
-from os.path import abspath, join, split, exists
+from os.path import abspath, join, split, exists, isdir
 import re
 import numpy as np
 import pandas as pd
@@ -108,6 +108,12 @@ def mapResultFiles(config: ReadConfig) -> Dict[int, List[Result]]:
     '''
     Goes through all files in the given directories and maps them to a dictionary of cases.
     '''
+    missingDirs = [(name, path) for name, path in config.simDataDirs if not isdir(path)]
+    if missingDirs:
+        for name, path in missingDirs:
+            print(f"ERROR: The '{name}' folder in [Simulation data paths] in config.ini does not exist: {path} (resolved to {abspath(path)})")
+        sys.exit(1)
+
     files: List[Tuple[str, str]] = list()
     for dir_ in config.simDataDirs:
         for file_ in listdir(dir_[1]):
