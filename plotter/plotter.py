@@ -815,8 +815,6 @@ def create_html(plots: List[go.Figure], goCursorList: List[go.Figure], path: str
 
 def create_html_plots(columns, plots, rank, rankName, sharedXaxis=False):
     if columns in range(1, maxHtmlColumnNr + 1):
-def create_html_plots(columns, plots, rank, rankName):
-    if columns in range(1, maxHtmlColumnNr + 1):
         figur_links = '<div style="text-align: left; margin-top: 1px;">'
         figur_links += '<h2><div id="Figures">Figures:</div></h2><br>'
         for p in plots:
