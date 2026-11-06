@@ -531,9 +531,8 @@ def drawPlot(rank: int,
             if mtbPath != 'MTB':
                 signalPathNames = [s.replace('MTB\\', mtbPath + '\\', 1) if s.startswith('MTB\\') else s for s in signalPathNames]  # Replace the relative path 'MTB\\' with the correct signal path with respect to 'Root/Main/' for all MTB signal, if necessary
             resultData = getPsoutSignals(result.fullpath, signalPathNames)                                                          # Get all the signals in the .psout file as a Pandas DataFrame
-            prefix_to_remove = mtbPath.replace('MTB', '', 1)
-            if prefix_to_remove != '\\':
-                resultData.columns = [col.removeprefix(prefix_to_remove) if 'MTB\\' in col else col for col in resultData.columns]  # Remove the path in front of all 'MTB\\signalName' columns in the DataFrame to reduce the legend lenght in the plots
+            if mtbPath != 'MTB':
+                resultData.columns = ['MTB\\' + col[len(mtbPath) + 1:] if col.startswith(mtbPath + '\\') else col for col in resultData.columns]  # Map e.g. 'External_Grid\\MTB_2\\signalName' back to 'MTB\\signalName' as used in figureSetup.csv
         elif result.typ == ResultType.EMT_CSV or result.typ == ResultType.EMT_ZIP:
             resultData = pd.read_csv(result.fullpath, sep=';', decimal=',')  # type: ignore
         else:
