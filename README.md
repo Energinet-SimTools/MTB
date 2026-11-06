@@ -12,7 +12,9 @@ MTB is intended to help facility owners and model providers evaluate simulation 
 4. Plot and compare RMS and EMT results making use of among other things, analytically calculated guide curves, cursor metrics, and visual inspection
 
 > [!IMPORTANT]
-> Using MTB is not a guarantee of model compliance. The plant owner remains responsible for ensuring that models comply with the requirements applicable at any time.
+> Using MTB in Danish grid connection processes is entirely voluntary, though recommended. The predefined test cases are designed to catch non-compliant behaviour in broad terms; they are not an exhaustive or fixed list. Existing cases can be edited, and new cases added, whenever relevant to properly assess compliance for a specific plant. Using MTB, including its predefined case sets, is not a guarantee of model compliance. The plant owner remains responsible for ensuring that models comply with the requirements applicable at any time, regardless of which test cases were run.
+>
+> Regardless of which test cases are run or passed, the connected plant must under no circumstances cause grid instability or reduce the security of the grid. Passing the predefined (or any) MTB test cases does not by itself constitute approval. A model will not be approved unless there is full confidence, established through whatever additional analysis and testing is necessary, that this requirement is met.
 
 <p align="center">
 	<!-- <img src="https://github.com/user-attachments/assets/2264d07d-e99f-46ab-bbb1-4dceddcc614b" width="800" height="210" alt="MTB workflow from testcase workbook to simulation and plotting"> -->

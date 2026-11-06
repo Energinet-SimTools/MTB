@@ -29,6 +29,9 @@ from tqdm import tqdm
 from shared_xaxis import shared_xaxis_script
 import warnings, logging
 
+# Above this, HTML output falls back to a single subplot grid
+maxHtmlColumnNr = 4
+
 try:
     LOG_FILE = open('plotter.log', 'w')
 except:
@@ -454,6 +457,8 @@ def genCursorPDF(goCursorList, rank, rankName, cursorPath):
     '''
     Generates PDF for cursor plots
     '''
+    from pypdf import PdfWriter
+
     cursor_pdf_filenames = []
     for i, goCursor in enumerate(goCursorList):
         cursor_pdf_filename = f'{cursorPath}_{i:02d}.pdf'
@@ -517,19 +522,18 @@ def drawPlot(rank: int,
             resultData = loadEMT(result.fullpath)
         elif result.typ == ResultType.EMT_PSOUT:
             signalPathNames = getUniqueEmtSignals(figureList)                                                                       # Make sure there are no duplicate signals
-            # Use the first signal, i.e. 'MTB\\mtb_s_pavail_pu' to find the location of the MTB instances (just to check if the MTB is not maybe placed on a different canvas than 'Main')
+            # Use the first signal, i.e. 'MTB\\mtb_s_pref_pu' to find the location of the MTB instances (just to check if the MTB is not maybe placed on a different canvas than 'Main')
             mtbPaths = findPsoutSignalPath(result.fullpath, signalPathNames[0])
             if mtbPaths is None:
-                print('ERROR: MTB not found!')
-                sys.exit(0)
+                print(f"ERROR: MTB path not found! Signal '{signalPathNames[0]}' is missing in {result.fullpath}")
+                sys.exit(1)
             else:                
                 mtbPath = mtbPaths[0]                                                                                               # There should one be one instance                                        
             if mtbPath != 'MTB':
                 signalPathNames = [s.replace('MTB\\', mtbPath + '\\', 1) if s.startswith('MTB\\') else s for s in signalPathNames]  # Replace the relative path 'MTB\\' with the correct signal path with respect to 'Root/Main/' for all MTB signal, if necessary
             resultData = getPsoutSignals(result.fullpath, signalPathNames)                                                          # Get all the signals in the .psout file as a Pandas DataFrame
-            prefix_to_remove = mtbPath.replace('MTB', '', 1)
-            if prefix_to_remove != '\\':
-                resultData.columns = [col.removeprefix(prefix_to_remove) if 'MTB\\' in col else col for col in resultData.columns]  # Remove the path in front of all 'MTB\\signalName' columns in the DataFrame to reduce the legend lenght in the plots
+            if mtbPath != 'MTB':
+                resultData.columns = ['MTB\\' + col[len(mtbPath) + 1:] if col.startswith(mtbPath + '\\') else col for col in resultData.columns]  # Map e.g. 'External_Grid\\MTB_2\\signalName' back to 'MTB\\signalName' as used in figureSetup.csv
         elif result.typ == ResultType.EMT_CSV or result.typ == ResultType.EMT_ZIP:
             resultData = pd.read_csv(result.fullpath, sep=';', decimal=',')  # type: ignore
         else:
@@ -553,8 +557,6 @@ def drawPlot(rank: int,
         print(f'Exported plot for Rank {rank} to {figurePath}.{config.imageFormat}')
 
     if config.genCursorPDF and len(goCursorList)>0:
-        from pypdf import PdfWriter
-
         cursorPath = figurePath+'_cursor'
         genCursorPDF(goCursorList, rank, rankName, cursorPath)
         print(f'Exported cursors for Rank {rank} to {cursorPath}.pdf')
@@ -608,7 +610,7 @@ def setupPlotLayout(rankName, config, figureList, htmlPlots, imagePlots, rank):
         lst.append((config.imageColumns, imagePlots))
 
     for columnNr, plotList in lst:
-        if columnNr == 1 and plotList == imagePlots or columnNr in (1,2,3) and plotList == htmlPlots:
+        if columnNr == 1 and plotList == imagePlots or columnNr in range(1, maxHtmlColumnNr + 1) and plotList == htmlPlots:
             for fig in figureList:
                 # Create a direct Figure instead of subplots when there's only 1 column
                 plotList.append(go.Figure())  # Normal figure, no subplots
@@ -812,7 +814,9 @@ def create_html(plots: List[go.Figure], goCursorList: List[go.Figure], path: str
 
 
 def create_html_plots(columns, plots, rank, rankName, sharedXaxis=False):
-    if columns in (1,2,3):
+    if columns in range(1, maxHtmlColumnNr + 1):
+def create_html_plots(columns, plots, rank, rankName):
+    if columns in range(1, maxHtmlColumnNr + 1):
         figur_links = '<div style="text-align: left; margin-top: 1px;">'
         figur_links += '<h2><div id="Figures">Figures:</div></h2><br>'
         for p in plots:
@@ -831,7 +835,7 @@ def create_html_plots(columns, plots, rank, rankName, sharedXaxis=False):
         html_content += f'<th style"width:{round(100/columns)}%"> &nbsp; </th>'
     html_content += '<tr>'
     for i, plot in enumerate(plots):
-        plot_title: str = plot['layout']['title']['text']  # type: ignore
+        plot_title: str = plot['layout']['title']['text'] or ''  # type: ignore  # Subplot layouts (columns > maxHtmlColumnNr) have no title
         plot_ref = plot_title.replace('$','') # For future use with MathJax
 
         if ((i+1) % columns) == 1:
