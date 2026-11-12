@@ -325,6 +325,11 @@ def main():
     print()
     print('execute_pscad.py started at:', datetime.now().strftime('%Y-%m-%d %H:%M:%S'), '\n')
     
+    if not os.path.isfile(sheetPath):
+        print(f'ERROR: Casesheet file not found: {sheetPath} (resolved to {os.path.abspath(sheetPath)})\n')
+        print('Check the [General] Casesheet path setting in config.ini.\n')
+        sys.exit(1)
+    
     pscad = connectPSCAD()
 
     # If the script is not executed from within PSCAD, run PSCAD as an external client

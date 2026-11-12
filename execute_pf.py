@@ -389,6 +389,9 @@ def addCustomSubscribers(thisScript : pf.ComPython, channels : List[si.Channel])
           chnl.addPFsub(obj, attrib)
 
 def main():
+  if not os.path.isfile(sheetPath):
+    raise RuntimeError(f'Casesheet file not found: {sheetPath} (resolved to {os.path.abspath(sheetPath)}). Check the [General] Casesheet path setting in config.ini.')
+
   # Connect to Powerfactory
   app, project, thisScript, pfVersion = connectPF()
 
