@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - Unreleased
+
+### Added
+
+#### PSCAD
+
+- `PSCAD version` setting in `config.ini` to select the PSCAD version launched when running as an external client (#322)
+
+#### Plotter
+
+- `sharedXaxis` option in the plotter `config.ini` to link x-axis zoom, pan and reset across all plots within each HTML page (#348, #364)
+
+### Changed
+
+#### Configuration
+
+- `config.ini` now states that only PSCAD 5.0.2 is currently supported, with 5.1.0 being experimental; the default `PSCAD version` is 5.0.2 (#363)
+
+#### Plotter
+
+- Maximum number of HTML columns increased to 4 (#354)
+- `PdfWriter` is now only imported when PDF generation is needed (#354)
+
+### Fixed
+
+#### PSCAD
+
+- Fixed recorded waveform files (`recordings_scaled\*.out`) not being found by EMTDC when the `.pswx` and `.pscx` files are in different folders; file paths are now resolved relative to the project build folder (#367)
+- Fixed MTB PGBs being disabled by the PGB synchronization when the MTB is not on the main canvas (#360)
+- Fixed `FFT_TRACKING` output when the frequency input is 0 at the first time step. This occurs when the frequency signal is transmitted via a radio link (transmitter and receiver(s)) from the canvas where the MTB is located to the canvas where the measurement units are located (#359)
+
+#### Plotter / HTML Reports
+
+- Fixed plotter when the MTB is located on a canvas named e.g. `MTB_1`, `MTB_2` (#362)
+- Fixed plotter for DSO cases where `mtb_s_pavail_pu` is not present; `mtb_s_pref_pu` is used instead (#355)
+- Fixed layout when the configured number of HTML columns exceeds the maximum allowed (#354)
+- Blank rows in the figure and cursor setup files (e.g. from Excel) are now skipped (#358)
+- Improved error message when the MTB path is not found in a `.psout` file; the plotter now exits with code 1 (#356)
+- Clarified comments in `getUniqueEmtSignals` (#357)
+
+#### General
+
+- `execute_pscad.py` and `execute_pf.py` now check that the casesheet file exists and print a clear error if it does not (#366)
+- The plotter now checks that each folder in `[Simulation data paths]` exists and prints an error for every missing folder (#365)
+
+---
+
 ## [2.0.0] - 2026-09-17
 
 ### Added
