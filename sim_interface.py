@@ -9,9 +9,8 @@ from typing import Union, Dict, List, Tuple, Optional, Callable
 from math import isnan
 from copy import copy
 from warnings import warn
-from os.path import join, split, splitext, exists, abspath, basename
-from os import mkdir, getcwd
-from glob import glob
+from os.path import join, split, splitext, exists, abspath, relpath, dirname
+from os import mkdir
 import pandas as pd
 
 try:
@@ -28,6 +27,9 @@ except ImportError:
 
 
 MEAS_FILE_FOLDER : str = 'recordings_scaled' # constant
+
+# PSCAD build folder (project.temp_folder). Set by renderFortran and used to make recorded file paths relative to it.
+pscad_build_folder : Optional[str] = None
 
 pf_time_offset : float = 0.0
 pscad_time_offset : float = 0.0
@@ -371,15 +373,8 @@ class Recorded(Waveform):
             f = open(recFilePath, 'w')
             f.write(measData)
             f.close()
-            
-            if len(glob('*.pswx')) == 0:
-                if len(glob('..\\*.pswx')) > 0:
-                    mtbBasePath = basename(getcwd())
-                    recFilePath = join(mtbBasePath, recFilePath)
-                else:
-                    raise RuntimeError('Could not find a PSCAD Workspace file ("*.pswx") in the current or parent folder.')
 
-            self.__pscadPath__ = recFilePath
+            self.__pscadPath__ = abspath(recFilePath)
             self.__pscadLen__ = df.index[-1] # type: ignore
 
     @property
@@ -408,7 +403,13 @@ class Recorded(Waveform):
     def pscadPath(self):
         if self.__pscadPath__ == None:
             raise RuntimeError('pscadPath not set.')
-        return self.__pscadPath__
+        if pscad_build_folder is None:
+            raise RuntimeError('PSCAD build folder not set. Pass it to renderFortran.')
+        # FILEREAD2 prepends "../" and resolves the path relative to the project build folder.
+        try:
+            return relpath(self.__pscadPath__, dirname(abspath(pscad_build_folder)))
+        except ValueError:
+            raise RuntimeError(f'Recorded file "{self.__pscadPath__}" must be on the same drive as the PSCAD project build folder "{pscad_build_folder}".')
     
     def add(self, t: float, s: float, r: float = 0) -> None:
         warn(f'Recorded waveform (source: {self.__path__}) .add method called. Ignoring.')
@@ -817,11 +818,14 @@ class PfObjRefer(String):
         for target, attribute in self.__PFsubs__:
             self.pfInterface.setAttribute(target, attribute, self.__strings__[rank])
 
-def renderFortran(path : str, channels : List[Channel]) -> None:
+def renderFortran(path : str, channels : List[Channel], buildFolder : str) -> None:
     """
     Renders all releavant signals and constants in a list to a single fortran file.
+    buildFolder is the PSCAD project build folder (project.temp_folder), used to resolve recorded file paths.
     """ 
-    
+    global pscad_build_folder
+    pscad_build_folder = buildFolder
+
     fortranCode = ''  
     for channel in channels:
         if isinstance(channel, FortranRenderable):

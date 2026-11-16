@@ -393,8 +393,10 @@ def main():
 
     writeCaseRankTaskIdCSV(emtCases) # Save "Case Rank", "TaskID", "Case Name" in a .csv file for PSCAD OOM Recovery
 
+    buildFolder : str = project.temp_folder #type: ignore
+
     print()
-    si.renderFortran('interface.f', channels)
+    si.renderFortran('interface.f', channels, buildFolder)
     
     #Set executed flag
     MTB.parameters(executed = 1) #type: ignore  
@@ -402,7 +404,6 @@ def main():
     #Add interface file to project
     addInterfaceFile(project)
 
-    buildFolder : str = project.temp_folder #type: ignore
     cleanBuildfolder(buildFolder) #type: ignore
 
     project.parameters(time_duration = 999,
