@@ -6,17 +6,18 @@ It supports optional compression of the output files, i.e. .zip, .gz, .bz2, or .
 It is designed to be used in conjunction with the process_psout set of function and uses Manitoba Hydro International (MHI) PSOUT File Reader Library.
 It is designed to be run from the command line with various options for input and output paths, compression type, and verbosity.
 '''
-import os, glob, time
+import os, sys, glob, time
 from datetime import datetime
-from process_psout import getPsoutSignals
 import argparse
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'plotter'))
+from process_psout import getPsoutSignals
 import numpy as np
 import pandas as pd
 
 __version__ = 2.0
 
 #-----------------------------------------------------------------------------#
-parser = argparse.ArgumentParser(prog = 'psout_to_csv',
+parser = argparse.ArgumentParser(prog = 'convert_psout_to_csv',
                                  description = 'Convert .psout to .csv with optional compression if required')
 parser.add_argument('-p', '--psoutFolder',
                     action = 'store',
@@ -37,7 +38,7 @@ parser.add_argument('-f', '--figureSetupPath',
                     dest = 'figureSetupPath',
                     nargs = '?',
                     metavar = 'FIGURESETUPPATH',
-                    default = 'figureSetup.csv',
+                    default = '..\\plotter\\figureSetup.csv',
                     help = 'the path to the figureSetup.csv file')
 parser.add_argument('-c', '--compressionType',
                     action = 'store',
