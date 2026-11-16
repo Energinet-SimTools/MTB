@@ -18,7 +18,7 @@ MTB is intended to help facility owners and model providers evaluate simulation 
 
 <p align="center">
 	<!-- <img src="https://github.com/user-attachments/assets/2264d07d-e99f-46ab-bbb1-4dceddcc614b" width="800" height="210" alt="MTB workflow from testcase workbook to simulation and plotting"> -->
-	<img width="1000" alt="image" src="https://github.com/user-attachments/assets/2bb9ffc7-150d-482e-b54d-af127151b8b5" />
+	<img width="1000" alt="MTB workflow: define test cases in testcases.xlsx, run PowerFactory RMS and PSCAD EMT simulations, then plot, compare and review the results" src="https://raw.githubusercontent.com/wiki/Energinet-SimTools/MTB/MTB_workflow.svg" />
 </p>
 
 ## Python/Plotly Output Example
