@@ -86,7 +86,7 @@ def rmsToGuideData(resultData, pfFlatTime):
     return guideData
 
 
-def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
+def genGuideResults(result, resultData, settingsDict, caseDf):
     '''
     Generates guide results for different test cases based on PSCAD or PowerFactory simulation data and settings.
     Guides whose input signals are missing in the result are skipped with a warning.
@@ -96,7 +96,6 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
         resultData: pandas.DataFrame containing simulation data.
         settingsDict: dict containing test settings and parameters.
         caseDf: pandas.DataFrame containing case configuration and events.
-        pscadInitTime: float, initial time offset from PSCAD simulation.
 
     Returns:
         dict with keys:
@@ -108,7 +107,7 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
     # Use the PSCAD or PowerFactory result for calculating the guide response
     if result.typ in EMT_RESULTS:
         guideData = resultData.copy()  # Make a copy of the original DataFrame to avoid modifying it directly
-        guideData['time'] = guideData.time - pscadInitTime
+        guideData['time'] = guideData.time - settingsDict['PSCAD Initialization time']
     elif result.typ == ResultType.RMS:
         guideData = rmsToGuideData(resultData, settingsDict['PF flat time'])
     else:
