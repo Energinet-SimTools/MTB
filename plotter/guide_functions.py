@@ -1,4 +1,5 @@
 import sys
+import re
 import numpy as np
 import pandas as pd
 from scipy.signal import bilinear, lfilter, lfiltic
@@ -31,6 +32,21 @@ def hasSignals(guideData, signals, guideName):
         print(f"Warning: Guide '{guideName}' skipped - missing signal(s): {', '.join(missing)}")
         return False
     return True
+
+
+def findEvents(caseDf, eventType):
+    '''
+    Returns a list of dicts with 'name', 'time', 'X1' and 'X2' for all 'Event N' columns in the case with the given event type,
+    so the guides do not depend on the event number (e.g. 'Event 1' can be an initialisation event like 'Signal 6').
+    '''
+    events = []
+    for eventName in caseDf.columns.get_level_values(0).unique():
+        if re.fullmatch(r'Event \d+', str(eventName)) and caseDf[eventName]['type'].item() == eventType:
+            events.append({'name': eventName,
+                           'time': caseDf[eventName]['time'].item(),
+                           'X1': caseDf[eventName]['X1'].item(),
+                           'X2': caseDf[eventName]['X2'].item()})
+    return events
 
 
 def rmsToGuideData(resultData, pfFlatTime):
@@ -131,15 +147,19 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
         
         # Active Power Ramping cases
         if ('P_step' in CaseName or 'PQ/Pn' in CaseName) and not 'Pavail' in CaseName:
-            assert caseDf['Event 1']['type'].item() == 'Pref'
-            Tstep = caseDf['Event 1']['time'].item()
-            Pstep = caseDf['Event 1']['X1'].item()
-            assert caseDf['Event 1']['X2'].item() == 0.0
-            
-            guideData['P_pu_PoC_Ramp'] = pd.Series([guidePramp(Pref=P0, Pn=Pn, Tstep=Tstep, Pstep=Pstep, t=t) for t in guideData.time])
-            
-            guideFigs.append('Ppoc')
-            guideSignals.append('P_pu_PoC_Ramp')
+            prefEvents = findEvents(caseDf, 'Pref')
+            if len(prefEvents) != 1:
+                print(f"Warning: Guide 'P step' skipped - expected exactly one 'Pref' event, found {len(prefEvents)}")
+            elif prefEvents[0]['X2'] != 0.0:
+                print(f"Warning: Guide 'P step' skipped - '{prefEvents[0]['name']}' 'Pref' X2 = {prefEvents[0]['X2']}, only X2 = 0 is supported")
+            else:
+                Tstep = prefEvents[0]['time']
+                Pstep = prefEvents[0]['X1']
+
+                guideData['P_pu_PoC_Ramp'] = pd.Series([guidePramp(Pref=P0, Pn=Pn, Tstep=Tstep, Pstep=Pstep, t=t) for t in guideData.time])
+
+                guideFigs.append('Ppoc')
+                guideSignals.append('P_pu_PoC_Ramp')
         
         # "Advance" (multi-step) Active Power Ramping cases (with limited Pavailable cases)
         elif 'Pref-change' in CaseName or 'Pavail_step' in CaseName or 'Pavail_variation' in CaseName:
@@ -263,14 +283,16 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             guideSignals.append('Q_pu_QU_Ctrl')  
             
         #PF control mode
+        hasPrefEvent = len(findEvents(caseDf, 'Pref')) > 0
+        hasQrefEvent = len(findEvents(caseDf, 'Qref')) > 0
         if (Qmode == 'PF' or (Qmode == 'Default' and Qdefault == 'PF')) and \
-           (caseDf['Event 1']['type'].item() != 'Qref' or hasSignals(guideData, ['MTB\\mtb_s_qref'], 'PF control')):
+           (hasPrefEvent or not hasQrefEvent or hasSignals(guideData, ['MTB\\mtb_s_qref'], 'PF control')):
             PFref0 = caseDf['Initial Settings']['Qref0'].item()              # Initial PF setpoint, Qref0, when Qmode == 'PF'
             
-            if caseDf['Event 1']['type'].item() == 'Pref':   # Pref changes -> slow ramping of Ppoc, thus use Ppoc and not Pref
+            if hasPrefEvent:   # Pref changes -> slow ramping of Ppoc, thus use Ppoc and not Pref
                 Ppoc = guideData['P_pu_PoC_Ramp'] if 'P_pu_PoC_Ramp' in guideData.columns else guideData['MTB\\mtb_s_pref_pu'] # Safety check to ensure that the 'P_pu_PoC_Ramp' column exists in the DataFrame before using it
                 guideData['Q_pu_Qpf_Inst'] = guideQpf(Ppoc=Ppoc, PFref=PFref0)
-            elif caseDf['Event 1']['type'].item() == 'Qref': # PFref changes & Pref constant
+            elif hasQrefEvent: # PFref changes & Pref constant
                 guideData['Q_pu_Qpf_Inst'] = guideQpf(Ppoc=guideData['MTB\\mtb_s_pref_pu'], PFref=guideData['MTB\\mtb_s_qref']) # Note that 'MTB\mtb_s_qref' = PF if Qmode == 'PF'
             else: # Use Initial settings
                 guideData['Q_pu_Qpf_Inst'] = guideQpf(Ppoc=P0, PFref=PFref0)
