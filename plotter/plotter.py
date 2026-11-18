@@ -205,13 +205,13 @@ def addResults(plots: List[go.Figure],
 
     SUBPLOT = (len(plots) == 1) # Check if output should be a subplot
     
-    pfFlatTIme = settingsDict['PF flat time']
-    pscadInitTime = settingsDict['PSCAD Initialization time']
-    
-    if genGuide: guide = genGuideResults(result, resultData, settingsDict,  caseDf, pscadInitTime)
+    if genGuide: guide = genGuideResults(result, resultData, settingsDict,  caseDf)
     
     rowPos = 1
     colPos = 1
+    
+    pfFlatTIme = settingsDict['PF flat time']
+    pscadInitTime = settingsDict['PSCAD Initialization time']
     
     fi = -1
     for figure in figures:
