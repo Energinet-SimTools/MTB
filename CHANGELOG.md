@@ -31,6 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Utility Scripts
 
 - `plotter/psout_to_csv.py` moved to `utility_scripts/` and renamed to `convert_psout_to_csv.py`. The script now locates `process_psout.py` in the `plotter` folder automatically, and the default `--figureSetupPath` is `..\plotter\figureSetup.csv` ([#369](https://github.com/Energinet-SimTools/MTB/pull/369))
+- `convert_psout_to_csv.py`: `--psoutFolder` is now required and the script exits with an error if the folder is missing or contains no `.psout` files. If `--figureSetupPath` is omitted, all PGB output channel signals are extracted. The default `--outputRootFolder` is now the parent folder of `--psoutFolder`, the output folder is printed on completion, and a new `--decimal` option selects `,` (with `;` column separator, default) or `.` (with `,` column separator). A new `--list` option lists all PGB output channel signals in the first `.psout` file
+
+### Removed
+
+#### Utility Scripts
+
+- `list_psout_signals.py` removed; use `convert_psout_to_csv.py --list` instead
 
 ### Fixed
 
