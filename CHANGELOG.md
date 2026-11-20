@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Plotter
 
 - `sharedXaxis` option in the plotter `config.ini` to link x-axis zoom, pan and reset across all plots within each HTML page ([#348](https://github.com/Energinet-SimTools/MTB/pull/348), [#364](https://github.com/Energinet-SimTools/MTB/pull/364))
+- Guide curves for RMS (PowerFactory) results: if a case has no EMT result, the guide curves are calculated from the RMS result. The MTB reference signals in the PowerFactory result (e.g. `mtb_s_pref_pu.ElmDsl` `s:yo`) are mapped to the guide signals, the PF flat time is removed and the result is resampled to a fixed time step with sample-and-hold, so event steps are kept as steps. RMS cases without the MTB reference signals (e.g. with the event `PF disconnect all ref.`) get no guide curves
 
 ### Changed
 
@@ -27,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Maximum number of HTML columns increased to 4 ([#354](https://github.com/Energinet-SimTools/MTB/pull/354))
 - `PdfWriter` is now only imported when PDF generation is needed ([#354](https://github.com/Energinet-SimTools/MTB/pull/354))
+- Guide curves are drawn once per case: from the first EMT result, or from the first RMS result if there is no EMT result (previously for every EMT result)
+- A guide curve whose input signals are missing in the result is skipped with a warning, e.g. `Warning: Guide 'SIPS' skipped - missing signal(s): MTB\mtb_s_sips_g`, instead of stopping the plotter; the other guide curves of the case are still drawn
+- The P step and PF control guide curves find the `Pref`/`Qref` events by event type in any `Event N` column, instead of assuming `Event 1`
+- `genGuideResults()` no longer has the `pscadInitTime` parameter; the PSCAD initialisation time and PF flat time are taken from the testcase settings
 - The cursor metric formatting is moved to `formatCursorMetric()` in `cursor_functions.py`, so it can be reused for other cursor intervals and front ends
 - The generic `.psout` functions `getPsoutSignalRecords()`, `listPsoutSignals()` and `getAllPsoutSignals()` are moved from `convert_psout_to_csv.py` to `process_psout.py`. They use the real signal paths in the `.psout` file; the MTB naming (`MTB\<signal>`, also when the MTB is not placed on the main canvas) is applied separately with `findMtbPath()`, `toMtbSignalName()` and `fromMtbSignalName()` in `process_results.py`, which also has `getAllMtbSignals()` and `getFigureSetupSignals()` to read all signals or the figureSetup signals of a `.psout` file with MTB naming
 - The plotter is about 16 times faster, with identical results:
