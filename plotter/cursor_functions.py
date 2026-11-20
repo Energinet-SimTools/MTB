@@ -151,102 +151,114 @@ def addCursorMetrics(ranksCursor, dfCursorsList, result, resultData, settingsDic
             cursorMetricData = []                
             for option in cursor.cursor_options:
                 for time_interval in getTimeIntervals(cursor.time_ranges):
-                    if option.name == 'START':
-                        t0, y0 = cursorStart(cursorSignalsDf, time_interval)
-                        cursorMetricText = f"Start: y({t0:.3f}) = {y0:.3f}"
-                        
-                    elif option.name == 'END':
-                       t1, y1 = cursorEnd(cursorSignalsDf, time_interval)
-                       cursorMetricText = f"End: y({t1:.3f}) = {y1:.3f}"
-                       
-                    elif option.name == 'DELTA':
-                       dy = cursorDelta(cursorSignalsDf, time_interval)
-                       cursorMetricText = f"Delta: \u0394y = {dy:.3f}"
-                       
-                    elif option.name == 'MIN':
-                        y_min, t_min = cursorMin(cursorSignalsDf, time_interval)
-                        cursorMetricText = f"Min: {y_min:.3f} at t = {t_min:.3f} s"
-                        
-                    elif option.name == 'MAX':
-                        y_max, t_max = cursorMax(cursorSignalsDf, time_interval)
-                        cursorMetricText = f"Max: {y_max:.3f} at t = {t_max:.3f} s"
-                        
-                    elif option.name == 'MEAN':
-                        y_mean = cursorMean(cursorSignalsDf, time_interval)
-                        cursorMetricText = f"Mean: {y_mean:.3f}"
-                        
-                    elif option.name == 'GRAD_MIN':
-                        y_grad_min = cursorGradMin(cursorSignalsDf, time_interval)
-                        cursorMetricText = f"Grad (min): {y_grad_min:.3f} pu/min"
-                        
-                    elif option.name == 'GRAD_MAX':
-                        y_grad_max = cursorGradMax(cursorSignalsDf, time_interval)
-                        cursorMetricText = f"Grad (max): {y_grad_max:.3f} pu/min"
-                        
-                    elif option.name == 'GRAD_MEAN':
-                        y_grad_mean = cursorGradMean(cursorSignalsDf, time_interval)
-                        cursorMetricText = f"Grad (mean): {y_grad_mean:.3f} pu/min"
-                        
-                    elif option.name == 'RESPONSE':
-                        t_response = cursorResponseDelay(cursorSignalsDf, time_interval)
-                        cursorMetricText = f"Response delay: {t_response:.3f} s"
-                        
-                    elif option.name == 'RISE_FALL':
-                        dy, tRiseFall = cursorRiseFallTime(cursorSignalsDf, time_interval)
-                        if not np.isnan(dy):
-                            labelRiseOrFall = 'Rise time' if dy > 0 else 'Fall time'
-                            cursorMetricText = f'{labelRiseOrFall}: {tRiseFall:.3f} s'
-                        else:
-                            cursorMetricText = 'Rise/Fall time: metric error'
-                        
-                    elif option.name == 'SETTLING':
-                        tSettling = cursorSettlingTime(cursorSignalsDf, time_interval, tol=2)
-                        cursorMetricText = f"Settling time: {tSettling:.3f} s"
-                        
-                    elif option.name == 'OVERSHOOT':
-                        yOSRatio, zeta = cursorPeakOvershoot(cursorSignalsDf, time_interval)
-                        cursorMetricText = f"Overshoot: {yOSRatio*100:.2f} % (\u03B6 \u2248 {zeta:.3f})"
-
-                    elif option.name == 'FSM_DROOP':
-                        fsmDroop = cursorFSMDroop(cursorSignalsDf, time_interval, settingsDict)
-                        cursorMetricText = f"FSM droop value: {fsmDroop:.2f}%"
-
-                    elif option.name == 'LFSM_DROOP':
-                        lfsmDroop = cursoLFSMDroop(cursorSignalsDf, time_interval, settingsDict)
-                        cursorMetricText = f"LFSM droop value: {lfsmDroop:.2f}%"
-                        
-                    elif option.name == 'QU_T1':
-                        t_response = cursorResponseDelay(cursorSignalsDf, time_interval)
-                        dy, tRiseFall = cursorRiseFallTime(cursorSignalsDf, time_interval)
-                        if not np.isnan(t_response) and not np.isnan(tRiseFall):
-                            t1 = t_response + tRiseFall
-                            cursorMetricText = f'Q(U) t1 response time: {t1:.3f} s'
-
-                    elif option.name == 'QU_T2':
-                        tSettling = cursorSettlingTime(cursorSignalsDf, time_interval, tol=2)
-                        cursorMetricText = f"Q(U) t2 settling time: {tSettling:.3f} s"
-                        
-                    elif option.name == 'QU_DROOP':
-                        s = cursorQUDroop(cursorSignalsDf, time_interval, caseDf)
-                        cursorMetricText = f"Q(U) droop value: {s:.2f}%"
-                        
-                    elif option.name == 'QU_SS_TOL':
-                        dqReg, dqSSTol = cursorQUSSTol(cursorSignalsDf, time_interval, settingsDict, caseDf)
-                        cursorMetricText = f'Q(U) steady-state tolerance: {dqSSTol:+.2f}% (\u0394Q required = {dqReg:+.3f} pu)'
-                        
-                    elif option.name == 'DELTA_FFC':
-                        diq, dFFC = cursorDeltaFFC(cursorSignalsDf, time_interval, settingsDict)
-                        if not np.isnan(dFFC):
-                            iqDiff = dFFC - diq 
-                            cursorMetricText = f'\u0394FFC required: {dFFC:.3f} pu (Iq diff. = {iqDiff:.3f} pu)'
-                        else:
-                            cursorMetricText = '\u0394FFC: metric error'
-                    else:
-                        cursorMetricText = f'Cursor function {option} not defined'
-                
+                    cursorMetricText = formatCursorMetric(option, cursorSignalsDf, time_interval, settingsDict, caseDf)
                     cursorMetricData.append(cursorMetricText)
 
             dfCursorsList[i][cursorSignalsDf.columns[1]] = cursorMetricData # Add column to cursor DataFrame, using the first cursor signal display name
+
+
+def formatCursorMetric(option, cursorSignalsDf, time_interval, settingsDict, caseDf):
+    '''
+    Calculate a single cursor metric (CursorType option) for the signals in cursorSignalsDf over the time_interval
+    and return it as a formatted text. The first column of cursorSignalsDf is the time, the second the signal and any
+    subsequent columns are auxiliary signals used by e.g. the droop, Q(U) and FFC metrics.
+    '''
+    if option.name == 'START':
+        t0, y0 = cursorStart(cursorSignalsDf, time_interval)
+        cursorMetricText = f"Start: y({t0:.3f}) = {y0:.3f}"
+        
+    elif option.name == 'END':
+       t1, y1 = cursorEnd(cursorSignalsDf, time_interval)
+       cursorMetricText = f"End: y({t1:.3f}) = {y1:.3f}"
+       
+    elif option.name == 'DELTA':
+       dy = cursorDelta(cursorSignalsDf, time_interval)
+       cursorMetricText = f"Delta: \u0394y = {dy:.3f}"
+       
+    elif option.name == 'MIN':
+        y_min, t_min = cursorMin(cursorSignalsDf, time_interval)
+        cursorMetricText = f"Min: {y_min:.3f} at t = {t_min:.3f} s"
+        
+    elif option.name == 'MAX':
+        y_max, t_max = cursorMax(cursorSignalsDf, time_interval)
+        cursorMetricText = f"Max: {y_max:.3f} at t = {t_max:.3f} s"
+        
+    elif option.name == 'MEAN':
+        y_mean = cursorMean(cursorSignalsDf, time_interval)
+        cursorMetricText = f"Mean: {y_mean:.3f}"
+        
+    elif option.name == 'GRAD_MIN':
+        y_grad_min = cursorGradMin(cursorSignalsDf, time_interval)
+        cursorMetricText = f"Grad (min): {y_grad_min:.3f} pu/min"
+        
+    elif option.name == 'GRAD_MAX':
+        y_grad_max = cursorGradMax(cursorSignalsDf, time_interval)
+        cursorMetricText = f"Grad (max): {y_grad_max:.3f} pu/min"
+        
+    elif option.name == 'GRAD_MEAN':
+        y_grad_mean = cursorGradMean(cursorSignalsDf, time_interval)
+        cursorMetricText = f"Grad (mean): {y_grad_mean:.3f} pu/min"
+        
+    elif option.name == 'RESPONSE':
+        t_response = cursorResponseDelay(cursorSignalsDf, time_interval)
+        cursorMetricText = f"Response delay: {t_response:.3f} s"
+        
+    elif option.name == 'RISE_FALL':
+        dy, tRiseFall = cursorRiseFallTime(cursorSignalsDf, time_interval)
+        if not np.isnan(dy):
+            labelRiseOrFall = 'Rise time' if dy > 0 else 'Fall time'
+            cursorMetricText = f'{labelRiseOrFall}: {tRiseFall:.3f} s'
+        else:
+            cursorMetricText = 'Rise/Fall time: metric error'
+        
+    elif option.name == 'SETTLING':
+        tSettling = cursorSettlingTime(cursorSignalsDf, time_interval, tol=2)
+        cursorMetricText = f"Settling time: {tSettling:.3f} s"
+        
+    elif option.name == 'OVERSHOOT':
+        yOSRatio, zeta = cursorPeakOvershoot(cursorSignalsDf, time_interval)
+        cursorMetricText = f"Overshoot: {yOSRatio*100:.2f} % (\u03B6 \u2248 {zeta:.3f})"
+
+    elif option.name == 'FSM_DROOP':
+        fsmDroop = cursorFSMDroop(cursorSignalsDf, time_interval, settingsDict)
+        cursorMetricText = f"FSM droop value: {fsmDroop:.2f}%"
+
+    elif option.name == 'LFSM_DROOP':
+        lfsmDroop = cursoLFSMDroop(cursorSignalsDf, time_interval, settingsDict)
+        cursorMetricText = f"LFSM droop value: {lfsmDroop:.2f}%"
+        
+    elif option.name == 'QU_T1':
+        t_response = cursorResponseDelay(cursorSignalsDf, time_interval)
+        dy, tRiseFall = cursorRiseFallTime(cursorSignalsDf, time_interval)
+        if not np.isnan(t_response) and not np.isnan(tRiseFall):
+            t1 = t_response + tRiseFall
+            cursorMetricText = f'Q(U) t1 response time: {t1:.3f} s'
+        else:
+            cursorMetricText = 'Q(U) t1 response time: metric error'
+
+    elif option.name == 'QU_T2':
+        tSettling = cursorSettlingTime(cursorSignalsDf, time_interval, tol=2)
+        cursorMetricText = f"Q(U) t2 settling time: {tSettling:.3f} s"
+        
+    elif option.name == 'QU_DROOP':
+        s = cursorQUDroop(cursorSignalsDf, time_interval, caseDf)
+        cursorMetricText = f"Q(U) droop value: {s:.2f}%"
+        
+    elif option.name == 'QU_SS_TOL':
+        dqReg, dqSSTol = cursorQUSSTol(cursorSignalsDf, time_interval, settingsDict, caseDf)
+        cursorMetricText = f'Q(U) steady-state tolerance: {dqSSTol:+.2f}% (\u0394Q required = {dqReg:+.3f} pu)'
+        
+    elif option.name == 'DELTA_FFC':
+        diq, dFFC = cursorDeltaFFC(cursorSignalsDf, time_interval, settingsDict)
+        if not np.isnan(dFFC):
+            iqDiff = dFFC - diq 
+            cursorMetricText = f'\u0394FFC required: {dFFC:.3f} pu (Iq diff. = {iqDiff:.3f} pu)'
+        else:
+            cursorMetricText = '\u0394FFC: metric error'
+    else:
+        cursorMetricText = f'Cursor function {option} not defined'
+
+    return cursorMetricText
 
 
 def cursorStart(cursorSignalsDf, time_interval):

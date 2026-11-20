@@ -2,7 +2,8 @@
 '''
 A set of functions to process Manitoba Hydro International (MHI) PSOUT files.
 This library provides functions to read and process PSOUT files.
-It uses the signal names defined in a figure setup CSV file to extract relevant signals from the PSOUT files.
+Signal paths are relative to Root\\Main and use '\\' as separator, e.g. 'Module\\SubModule\\signal_name', to be
+consistent with MHI's Enerplot (and PowerFactory). The paths are converted to the '/' separator used by mhi.psout.
 It is designed to be used in conjunction with the Manitoba Hydro International (MHI) PSOUT File Reader Library.
 '''
 
@@ -27,11 +28,11 @@ def findPsoutSignalPath(psoutFilePath: str, signalPathName: str, sourceType: str
 
     Parameters:
         psoutFilePath: The path to the .psout file
-        signalPathName: Can be in the format 'MTB\\signal_name' or just 'signal_name' 
+        signalPathName: Can be in the format 'Module\\signal_name' or just 'signal_name' 
                         as the leading path will be stripped to get just the signal name.
         sourceType: Should be a valid source type, e.g. 'Module', 'Graphic', 'PGB', etc.
     """
-    # Strip any leading path prefix (e.g. 'MTB\\' or 'SomePath\\MTB\\') to get just the signal name
+    # Strip any leading path prefix (e.g. 'Module\\' or 'Module\\SubModule\\') to get just the signal name
     signalName = signalPathName.split('\\')[-1]
 
     def search_node(node, current_path='', depth=0):
@@ -67,12 +68,79 @@ def findPsoutSignalPath(psoutFilePath: str, signalPathName: str, sourceType: str
         results = search_node(root)
         return results if results else None
        
+def getPsoutSignalRecords(psoutFile):
+    '''
+    Find all PGB output channel signals in an opened .psout file (mhi.psout.File).
+    Returns a dict of {signal path: data record call}, where the signal path is relative to Root\\Main
+    using '\\' as separator (as in Enerplot) and the record's calls are the trace(s) of the signal.
+    '''
+    records = dict()
+
+    def traverse(node, currentPath=''):
+        for call in node.calls():
+            name = call.variables().get('Name', '')
+            source = call.variables().get('Source', '')
+            path = f'{currentPath}\\{name}' if currentPath else name
+            if source == 'PGB':
+                if path in records:
+                    print(f"Warning: Duplicate signal path '{path}'. Skipping...")
+                    continue
+                try:
+                    records[path] = psoutFile.call('Root/Main/' + path.replace('\\', '/') + '/0')
+                except Exception:
+                    print(f"Warning: Signal '{path}' could not be read. Skipping...")
+            elif source == 'Module':
+                traverse(call, path)
+
+    traverse(psoutFile.call('Root/Main'))
+    return records
+
+
+def listPsoutSignals(psoutFilePath):
+    '''
+    List all PGB output channel signals in the .psout file.
+    Returns a list of (signal path, number of traces) sorted by signal path, where the signal path is relative to
+    Root\\Main and the number of traces is > 1 for signal arrays.
+    '''
+    with mhi.psout.File(psoutFilePath) as psoutFile:
+        records = getPsoutSignalRecords(psoutFile)
+        return sorted(((path, record.num_calls) for path, record in records.items()), key=lambda item: item[0].lower())
+
+
+def getAllPsoutSignals(psoutFilePath):
+    '''
+    Get all PGB output channel signals in the .psout file as a DataFrame with a 'time' column.
+    Column names are the signal paths relative to Root\\Main, with an '_<n>' suffix for each element of signal arrays.
+    '''
+    columns = dict()
+    time = None
+
+    with mhi.psout.File(psoutFilePath) as psoutFile:
+        run = psoutFile.run(0)
+        for path, record in getPsoutSignalRecords(psoutFile).items():
+            traces = [run.trace(traceCall) for traceCall in record.calls()]
+            if not traces:
+                continue
+            if time is None:
+                time = np.array(traces[0].domain.data)
+            for i, trace in enumerate(traces):
+                data = np.array(trace.data)
+                if data.shape != time.shape:
+                    print(f"Warning: Signal '{path}' has a different length than the time vector. Skipping...")
+                    break
+                columns[path if len(traces) == 1 else f'{path}_{i+1}'] = data
+
+    if time is None:
+        return pd.DataFrame()
+    return pd.DataFrame({'time': time, **columns})
+
+
 def getPsoutSignal(psoutFilePath, signalPathName):
     '''
     Get time and trace/signal from the opened psout file
     '''
-    data_path = 'Root\\Main\\'+ signalPathName +'\\0'       # figureSetup.csv uses '\\' to be consistend with PowerFactory (and MHI's Enerplot)
-    data_path = data_path.replace('\\', '/')                # But mhi.psout want to use '/'
+    data_path = 'Root\\Main\\'+ signalPathName +'\\0'       # Signal paths use '\\' to be consistent with MHI's Enerplot (and PowerFactory)
+    data_path = data_path.replace('\\', '/')                # But mhi.psout wants '/'
     
     with mhi.psout.File(psoutFilePath) as psoutFile:
         try:
@@ -96,46 +164,39 @@ def getPsoutSignals(psoutFilePath, signalPathNames):
     Get all signals from the .psout file whose names appear in the signalPathNames list
     Exit if the first signal (time refrence) is missing.
     Missing signals are ignored.
+    The .psout file is opened only once, as opening it for every signal is slow.
     '''    
     
     if not signalPathNames:                                             # Return an empy DataFrame is the signalPathNames list is empy.
         return pd.DataFrame()
-    
-    t, _ = getPsoutSignal(psoutFilePath, signalPathNames[0])            # Get time values to get the length of all the signals in the .psout file
 
-    if t is None:
-            print(f"CRITICAL: Primary signal '{signalPathNames[0]}' (Time) not found. Cannot proceed.")
-            sys.exit(1)
+    columnNames = ['time']                                              # Column names to be used for the returned DataFrame
+    psoutSignals = []                                                   # Rows of the returned DataFrame, the time first
 
-    t = np.array(t)                                                     # Convert to a numpy array
-    t = t.reshape(1,-1)                                                 # Reshape the t from (N,) to (1,N)
-    psoutSignals = np.array(t)                                          # Use as first row for the signals array
-    
-    columnNames = signalPathNames.copy()                                # Column names to be used for the returned DataFrame
-    idxOffset = 0                                                       # To keep track of the columnnames size as signals are converter to signal arrays
-    
-    for signalPathName in signalPathNames:
-        _, psoutSignal = getPsoutSignal(psoutFilePath, signalPathName)  # Try to get each signal in the signalnames list
+    with mhi.psout.File(psoutFilePath) as psoutFile:
+        run = psoutFile.run(0)
+        for n, signalPathName in enumerate(signalPathNames):
+            data_path = 'Root\\Main\\'+ signalPathName +'\\0'           # Signal paths use '\\' to be consistent with MHI's Enerplot (and PowerFactory)
+            data_path = data_path.replace('\\', '/')                    # But mhi.psout wants '/'
+            try:
+                data = psoutFile.call(data_path)
+            except:
+                print(f'The signal data path, {data_path} could not be found in {psoutFilePath}!')
+                if n == 0:
+                    print(f"CRITICAL: Primary signal '{signalPathName}' (Time) not found. Cannot proceed.")
+                    sys.exit(1)
+                print(f"Warning: Signal '{signalPathName}' not found. Skipping...")
+                continue
 
-        if psoutSignal is None:
-            print(f"Warning: Signal '{signalPathName}' not found. Skipping...")
-            columnNames.remove(signalPathName)                          # Remove the signal name
-            continue        
-                
-        psoutSignal = np.array(psoutSignal)                             # Convert to numpy array
+            traces = [run.trace(call) for call in data.calls()]
+            if n == 0:
+                psoutSignals.append(np.array(traces[-1].domain.data))   # Use the time of the first signal as the time column
 
-        # Test for signal array and convert signal name to a set of signal names for each signal in the array
-        signalRows = psoutSignal.shape[0]
-        if  signalRows > 1:
-            idx = signalPathName.index(signalPathName)
-            columnNames.remove(signalPathName)                          # Remove the signal name
-            for i in range(signalRows):                                 # And replace it with signal array names
-                columnNames.insert(idxOffset+idx+i,f'{signalPathName}_{i+1}')
-                
-            idxOffset = idxOffset + signalRows-1                        # Add the offset due to the signal array, to the column name index
-            
-        psoutSignals = np.append(psoutSignals, psoutSignal, axis=0)     # Append to the signals array containing the time
-        
-    columnNames = ['time']+columnNames                                  # Add the lable to be used for the time column
-    
-    return pd.DataFrame(np.transpose(psoutSignals), columns=columnNames)
+            # A signal array gets a set of signal names, one for each signal in the array
+            if len(traces) > 1:
+                columnNames.extend(f'{signalPathName}_{i+1}' for i in range(len(traces)))
+            else:
+                columnNames.append(signalPathName)
+            psoutSignals.extend(np.array(trace.data) for trace in traces)
+
+    return pd.DataFrame(np.transpose(np.array(psoutSignals)), columns=columnNames)

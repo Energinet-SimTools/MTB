@@ -85,9 +85,11 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
 
             if 'step' in CaseName and not 'pstep' in CaseName: # Run guideLFSM only for 'step', but not for 'pstep'
                 guideData['P_pu_LFSM_FFR'] = guideData['MTB\\mtb_s_pref_pu'].clip(upper=guideData['MTB\\mtb_s_pavail_pu']) # Create the 'dummy' active power reference signal clipped to the available power be to 'overwritten' below
-                for i, row in guideData.iterrows():
-                    PpuLFSM = guideLFSM(Pref=row['MTB\\mtb_s_pref_pu'], f=row['f_hz_Td_Lpf'], Pavail=row['MTB\\mtb_s_pavail_pu'], DK=DK, FSM=FSM, s_fsm=s_fsm, db=db)
-                    guideData.loc[i, 'P_pu_LFSM_FFR'] = PpuLFSM
+                # Loop over NumPy arrays, as row-wise DataFrame access is very slow for long EMT signals
+                pref = guideData['MTB\\mtb_s_pref_pu'].to_numpy()
+                fTdLpf = guideData['f_hz_Td_Lpf'].to_numpy()
+                pavail = guideData['MTB\\mtb_s_pavail_pu'].to_numpy()
+                guideData['P_pu_LFSM_FFR'] = [guideLFSM(Pref=pref[k], f=fTdLpf[k], Pavail=pavail[k], DK=DK, FSM=FSM, s_fsm=s_fsm, db=db) for k in range(len(guideData))]
                                 
                 guideFigs.append('Ppoc')
                 guideSignals.append('P_pu_LFSM_FFR')                                   
@@ -160,24 +162,30 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             # Implement a LPF on the Upos to slow down the Q(U) response during an "instantaneous" LVFRT event
             guideData['fft_pos_Vmag_pu_lpf'] = guideLPF(guideData['MTB\\fft_pos_Vmag_pu'], fc_Upos, 1/Ts)
             
-            guideData['Q_pu_QU_Inst'] = Qref0      # Create new signal to populate
+            # Loop over NumPy arrays, as row-wise DataFrame access is very slow for long EMT signals
+            tArr = guideData['time'].to_numpy()
+            uposLpf = guideData['fft_pos_Vmag_pu_lpf'].to_numpy()
+            qref = guideData['MTB\\mtb_s_qref'].to_numpy()
+            qudroop = guideData['MTB\\mtb_s_qudroop'].to_numpy()
+            qQUInst = np.full(len(guideData), Qref0, dtype=float)
             Qprev = Qref0
-            for i, row in guideData.iterrows():
-                if row['time'] < tThresh:
-                    guideData.loc[i, 'Q_pu_QU_Inst'] = Qref0
+            for k in range(len(guideData)):
+                if tArr[k] < tThresh:
+                    qQUInst[k] = Qref0
                     continue
 
-                if row['fft_pos_Vmag_pu_lpf'] > vposFrtLimit:  # No FRT
+                if uposLpf[k] > vposFrtLimit:  # No FRT
                     Qnow = guideQU(
-                        Uref=row['MTB\\mtb_s_qref'],
-                        Upos=row['fft_pos_Vmag_pu_lpf'],
-                        s=row['MTB\\mtb_s_qudroop'],
+                        Uref=qref[k],
+                        Upos=uposLpf[k],
+                        s=qudroop[k],
                         Qref=Qref0
                     )
-                    guideData.loc[i, 'Q_pu_QU_Inst'] = Qnow
+                    qQUInst[k] = Qnow
                     Qprev = Qnow
                 else:
-                    guideData.loc[i, 'Q_pu_QU_Inst'] = Qprev
+                    qQUInst[k] = Qprev
+            guideData['Q_pu_QU_Inst'] = qQUInst
                 
             # Change LPF setting for Q(U)
             trise_QU = 0.95                                                     # Rise time [s]
@@ -225,11 +233,14 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
             U0 = max(_U0, V_EPS) if np.isfinite(_U0) else 1.0
             Iq0 = float(Q0.iloc[0]) / U0
 
-            guideData['Iq_pu_FFC_Inst'] = 0.0
-            for i, row in guideData.iterrows():
-                Upos = row['MTB\\fft_pos_Vmag_pu']
+            # Loop over NumPy arrays, as row-wise DataFrame access is very slow for long EMT signals
+            uposArr = guideData['MTB\\fft_pos_Vmag_pu'].to_numpy()
+            q0Arr = Q0.to_numpy()
+            iqFFCInst = np.zeros(len(guideData), dtype=float)
+            for k in range(len(guideData)):
+                Upos = uposArr[k]
                 if not np.isfinite(Upos):
-                    guideData.loc[i, 'Iq_pu_FFC_Inst'] = Iq0
+                    iqFFCInst[k] = Iq0
                     continue
 
                 # FRT state with hysteresis
@@ -241,9 +252,10 @@ def genGuideResults(result, resultData, settingsDict, caseDf, pscadInitTime):
                 # Update Iq0 only outside FRT
                 if not IN_FRT:
                     U0 = max(Upos, V_EPS)
-                    Iq0 = Q0.loc[i] / U0
+                    Iq0 = q0Arr[k] / U0
 
-                guideData.loc[i, 'Iq_pu_FFC_Inst'] = guideFFC(Upos=Upos, Iq0=Iq0, DK=DK, DSO=DSO)
+                iqFFCInst[k] = guideFFC(Upos=Upos, Iq0=Iq0, DK=DK, DSO=DSO)
+            guideData['Iq_pu_FFC_Inst'] = iqFFCInst
 
             trise_FFC = 0.025                                                   # Rise time [s]
             fc_FFC = 0.35 / trise_FFC                                           # Cut-off frequency [Hz]
