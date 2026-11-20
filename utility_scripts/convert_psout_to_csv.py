@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
 This is a script to convert Manitoba Hydro International (MHI) PSOUT files to CSV format.
-It reads the PSOUT files from a specified folder, extracts the required signals based on a figure setup CSV file, and writes the data to CSV files. 
+It reads the PSOUT files from a specified folder, extracts the required signals based on a figure setup CSV file (or all PGB output channel signals if no figure setup file is given), and writes the data to CSV files.
 It supports optional compression of the output files, i.e. .zip, .gz, .bz2, or .xz formats provided by Pandas' "to_csv" function.
 It is designed to be used in conjunction with the process_psout set of function and uses Manitoba Hydro International (MHI) PSOUT File Reader Library.
 It is designed to be run from the command line with various options for input and output paths, compression type, and verbosity.
@@ -9,8 +9,10 @@ It is designed to be run from the command line with various options for input an
 import os, sys, glob, time
 from datetime import datetime
 import argparse
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'plotter'))
-from process_psout import getPsoutSignals
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(SCRIPT_DIR, '..', 'plotter'))
+from process_psout import listPsoutSignals
+from process_results import findMtbPath, toMtbSignalName, getAllMtbSignals, getFigureSetupSignals
 import numpy as np
 import pandas as pd
 
@@ -24,22 +26,22 @@ parser.add_argument('-p', '--psoutFolder',
                     dest = 'psoutFolder',
                     nargs = '?',
                     metavar = 'PSOUTFOLDER',
-                    default = '..\\export\\MTB_27042026094343',
-                    help = 'the folder where the .psout files are located')
+                    required = True,
+                    help = 'the folder where the .psout files are located (required)')
 parser.add_argument('-o', '--outputRootFolder',
                     action = 'store',
                     dest = 'outputRootFolder',
                     nargs = '?',
                     metavar = 'OUTPUTROOTFOLDER',
-                    default = '..\\export',
-                    help = 'the output root folder where the date-time stamped folder will be created and the [compressed] .csv files will be saved')
+                    default = None,
+                    help = 'the output root folder where the date-time stamped folder will be created and the [compressed] .csv files will be saved (default: the parent folder of PSOUTFOLDER)')
 parser.add_argument('-f', '--figureSetupPath',
                     action = 'store',
                     dest = 'figureSetupPath',
                     nargs = '?',
                     metavar = 'FIGURESETUPPATH',
-                    default = '..\\plotter\\figureSetup.csv',
-                    help = 'the path to the figureSetup.csv file')
+                    default = None,
+                    help = 'the path to the figureSetup.csv file. If omitted, all PGB output channel signals are extracted')
 parser.add_argument('-c', '--compressionType',
                     action = 'store',
                     dest = 'compressionType',
@@ -48,6 +50,17 @@ parser.add_argument('-c', '--compressionType',
                     metavar = 'COMPRESSIONTYPE',
                     default = '.csv',
                     help = 'the output compression type e.g. .zip, .bz2, .gz or .xz')
+parser.add_argument('-d', '--decimal',
+                    action = 'store',
+                    dest = 'decimal',
+                    choices = ['.', ','],
+                    default = ',',
+                    help = "the decimal separator. '.' uses ',' as column separator, ',' uses ';' as column separator (default: ',')")
+parser.add_argument('-l', '--list',
+                    action = 'store_true',
+                    dest = 'listSignals',
+                    default = False,
+                    help = 'list all PGB output channel signals in the first .psout file in PSOUTFOLDER and exit without converting')
 parser.add_argument('-q', '--quiet',
                     action = 'store_true',
                     dest = 'QUIET',
@@ -96,32 +109,87 @@ def getCaseSignalnames(emtSignalnamesDF, case):
     return signalnames
 
 
-def convertPsouts(psoutFolder, csvFolder, outFileType, lstSignalnames):
-    psoutFilesPath = glob.glob(os.path.join(psoutFolder,'*.psout'))
-    os.mkdir(csvFolder)
+def printPsoutSignals(psoutFilePath):
+    '''
+    Print all PGB output channel signal paths in the .psout file, sorted, with the array size for signal arrays.
+    MTB signals are listed as 'MTB\\<signal>', also if the MTB is not placed on the main canvas.
+    '''
+    signals = listPsoutSignals(psoutFilePath)
+    mtbPath = findMtbPath(path for path, _ in signals)
+    print(f'PGB output channel signals in {psoutFilePath}:')
+    if mtbPath and mtbPath != 'MTB':
+        print(f'  (The MTB is located at {mtbPath} and its signals are listed as MTB\\...)')
+    for path, numTraces in sorted(signals, key=lambda item: toMtbSignalName(item[0], mtbPath).lower()):
+        print(f'  {toMtbSignalName(path, mtbPath)}' + (f'  [{numTraces}]' if numTraces > 1 else ''))
+    print(f'{len(signals)} signal(s) found')
+
+
+def convertPsouts(psoutFilesPath, csvFolder, outFileType, lstSignalnames):
+    '''
+    Convert the .psout files to .csv files. If lstSignalnames is None all PGB output channel signals are extracted.
+    Returns the number of files written.
+    '''
+    os.makedirs(csvFolder)
+    filesWritten = 0
 
     for psoutFilePath in psoutFilesPath:
         psoutFileNameExt = os.path.basename(psoutFilePath)
         psoutFileName = os.path.splitext(psoutFileNameExt)[0]
-        projectname, case = psoutFileName.split('_')
-        case = int(case)
+        try:
+            projectname, case = psoutFileName.rsplit('_', 1)
+            case = int(case)
+        except ValueError:
+            print(f"Warning: '{psoutFileNameExt}' does not follow the <project>_<case>.psout naming convention. Skipping...")
+            continue
         if not args.QUIET: print(f'Processing {psoutFileNameExt}')
-        signalnames = getCaseSignalnames(lstSignalnames, case)
-        dfSignals = getPsoutSignals(psoutFilePath, signalnames)
+        if lstSignalnames is None:
+            dfSignals = getAllMtbSignals(psoutFilePath)
+        else:
+            signalnames = getCaseSignalnames(lstSignalnames, case)
+            dfSignals = getFigureSetupSignals(psoutFilePath, signalnames)
+        if dfSignals.empty:
+            print(f'Warning: No signals found for {psoutFileNameExt}. Skipping...')
+            continue
         dfSignals.set_index('time', inplace=True)
         if not args.QUIET: print(f'Writing {projectname}_{case:02}{outFileType}\n')
-        dfSignals.to_csv(os.path.join(csvFolder, f'{projectname}_{case:02}{outFileType}'), sep=';', header=True, compression='infer', decimal=',') #Note: For a Danish computer, decimal=',' else numbers are read in incorrelty in Excel
+        separator = ',' if args.decimal == '.' else ';'
+        dfSignals.to_csv(os.path.join(csvFolder, f'{projectname}_{case:02}{outFileType}'), sep=separator, header=True, compression='infer', decimal=args.decimal) #Note: For a Danish computer, decimal=',' else numbers are read in incorrectly in Excel
+        filesWritten += 1
+
+    return filesWritten
 
 
 def main():
     # For .psout post processing
     start = time.time()
-    lstSignalnames = getAllSignalnames(args.figureSetupPath)    
-    outputFolder = os.path.join(args.outputRootFolder, f'MTB_{datetime.now().strftime(r"%d%m%Y%H%M%S")}')
-    convertPsouts(args.psoutFolder, outputFolder, args.compressionType, lstSignalnames)
+
+    if not os.path.isdir(args.psoutFolder):
+        sys.exit(f'Error: The .psout folder "{args.psoutFolder}" does not exist.')
+    psoutFilesPath = glob.glob(os.path.join(args.psoutFolder, '*.psout'))
+    if not psoutFilesPath:
+        sys.exit(f'Error: No .psout files found in "{args.psoutFolder}".')
+
+    if args.listSignals:
+        printPsoutSignals(psoutFilesPath[0])
+        return
+
+    if args.figureSetupPath is None:
+        if not args.QUIET: print('No figureSetup.csv specified. Extracting all PGB output channel signals.')
+        lstSignalnames = None
+    elif not os.path.isfile(args.figureSetupPath):
+        sys.exit(f'Error: The figureSetup.csv file "{args.figureSetupPath}" does not exist.')
+    else:
+        lstSignalnames = getAllSignalnames(args.figureSetupPath)
+
+    outputRootFolder = args.outputRootFolder if args.outputRootFolder else os.path.dirname(os.path.abspath(args.psoutFolder))
+    outputFolder = os.path.abspath(os.path.join(outputRootFolder, f'MTB_{datetime.now().strftime(r"%d%m%Y%H%M%S")}'))
+    filesWritten = convertPsouts(psoutFilesPath, outputFolder, args.compressionType, lstSignalnames)
+    if filesWritten == 0:
+        os.rmdir(outputFolder)
+        sys.exit('Error: No .csv files were written.')
     end = time.time()
     elapsed = end - start
-    print(f'Done! ({elapsed:.2f} s)')
+    print(f'Done! {filesWritten} file(s) written to "{outputFolder}" ({elapsed:.2f} s)')
 
 if __name__ == '__main__':
     main()

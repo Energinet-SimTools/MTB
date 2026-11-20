@@ -17,12 +17,12 @@ def getColNames(rawSigName, result):
             sigColName = ('\\'.join(splitSigName[:-1]), splitSigName[-1])
         else:
             sigColName = rawSigName
-    elif result.typ in (ResultType.EMT_INF, ResultType.EMT_CSV, ResultType.EMT_ZIP):
-        # uses only the signal name - last part of the hierarchical signal name
+    elif result.typ == ResultType.EMT_INF:
+        # Legacy (MTB 1.0) .inf/.csv results have no signal path, i.e. only the unique signal name is used
         rawSigName = rawSigName.split('\\')[-1]
         sigColName = rawSigName
-    elif result.typ == ResultType.EMT_PSOUT:
-        # uses the full hierarchical signal name
+    elif result.typ in (ResultType.EMT_PSOUT, ResultType.EMT_CSV, ResultType.EMT_ZIP):
+        # uses the full hierarchical signal name, e.g. 'MTB\\P_pu_PoC' (also for .csv files from convert_psout_to_csv.py)
         sigColName = rawSigName
     else:
         print(f'File type: {result.typ} unknown')
@@ -59,3 +59,60 @@ def getUniqueEmtSignals(figureList):
     
     return unique_emt_signals
 
+
+def findMtbPath(signalPaths):
+    '''
+    Find the path of the MTB module relative to Root\\Main, e.g. 'MTB' or 'Grid\\MTB_2', from the location of the
+    'mtb_s_pref_pu' signal in the signal paths, e.g. the keys of getPsoutSignalRecords() or the columns of
+    getAllPsoutSignals(). Returns None if it is not found.
+    '''
+    for path in signalPaths:
+        if path.endswith('\\mtb_s_pref_pu'):
+            return path[:-len('\\mtb_s_pref_pu')]
+    return None
+
+
+def toMtbSignalName(signalPath, mtbPath):
+    '''
+    Map an actual .psout signal path to the figureSetup.csv name, i.e. MTB signals are always named 'MTB\\<signal>'
+    even if the MTB is not placed on the main canvas, e.g. 'Grid\\MTB_2\\P_pu_PoC' -> 'MTB\\P_pu_PoC'
+    '''
+    if mtbPath and mtbPath != 'MTB' and signalPath.startswith(mtbPath + '\\'):
+        return 'MTB\\' + signalPath[len(mtbPath) + 1:]
+    return signalPath
+
+
+def fromMtbSignalName(signalName, mtbPath):
+    '''
+    The inverse of toMtbSignalName(), e.g. 'MTB\\P_pu_PoC' -> 'Grid\\MTB_2\\P_pu_PoC'
+    '''
+    if mtbPath and mtbPath != 'MTB' and signalName.startswith('MTB\\'):
+        return mtbPath + '\\' + signalName[4:]
+    return signalName
+
+
+def getAllMtbSignals(psoutFilePath):
+    '''
+    Get all PGB output channel signals in the .psout file, with the MTB signals always named 'MTB\\<signal>'
+    '''
+    from process_psout import getAllPsoutSignals
+
+    dfSignals = getAllPsoutSignals(psoutFilePath)
+    mtbPath = findMtbPath(dfSignals.columns)
+    dfSignals.columns = [toMtbSignalName(c, mtbPath) for c in dfSignals.columns]
+    return dfSignals
+
+
+def getFigureSetupSignals(psoutFilePath, signalnames):
+    '''
+    Get the figureSetup.csv signals from the .psout file. The 'MTB\\' signals are found also if the MTB is not
+    placed on the main canvas, and are always named 'MTB\\<signal>' in the returned DataFrame.
+    '''
+    import mhi.psout
+    from process_psout import getPsoutSignalRecords, getPsoutSignals
+
+    with mhi.psout.File(psoutFilePath) as psoutFile:
+        mtbPath = findMtbPath(getPsoutSignalRecords(psoutFile))
+    dfSignals = getPsoutSignals(psoutFilePath, [fromMtbSignalName(s, mtbPath) for s in signalnames])
+    dfSignals.columns = [toMtbSignalName(c, mtbPath) for c in dfSignals.columns]
+    return dfSignals

@@ -27,10 +27,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Maximum number of HTML columns increased to 4 ([#354](https://github.com/Energinet-SimTools/MTB/pull/354))
 - `PdfWriter` is now only imported when PDF generation is needed ([#354](https://github.com/Energinet-SimTools/MTB/pull/354))
+- The cursor metric formatting is moved to `formatCursorMetric()` in `cursor_functions.py`, so it can be reused for other cursor intervals and front ends
+- The generic `.psout` functions `getPsoutSignalRecords()`, `listPsoutSignals()` and `getAllPsoutSignals()` are moved from `convert_psout_to_csv.py` to `process_psout.py`. They use the real signal paths in the `.psout` file; the MTB naming (`MTB\<signal>`, also when the MTB is not placed on the main canvas) is applied separately with `findMtbPath()`, `toMtbSignalName()` and `fromMtbSignalName()` in `process_results.py`, which also has `getAllMtbSignals()` and `getFigureSetupSignals()` to read all signals or the figureSetup signals of a `.psout` file with MTB naming
+- The plotter is about 16 times faster, with identical results:
+  - The row-by-row loops for the LFSM, Q(U) and FFC guide curves in `guide_functions.py` now use NumPy arrays
+  - `getPsoutSignals()` in `process_psout.py` opens the `.psout` file once instead of once per signal (also used by `convert_psout_to_csv.py`)
+
+  Plotter time per case (`.psout` results, HTML with guide curves and cursors, `processes = 1`, no images):
+
+  | Case | Type | 2.0.0 [s] | 2.0.1 [s] | Speed-up |
+  | ---- | ---- | --------: | --------: | -------: |
+  | 1 | Flat run | 2.4 | 1.4 | 1.7x |
+  | 11 | P step, Q(U) control | 32.6 | 1.2 | 28x |
+  | 17 | FSM step, Q(U) control | 29.1 | 0.9 | 34x |
+  | 41 | FRT, Q(U) control | 22.7 | 0.9 | 25x |
+  | 57 | SIPS | 1.2 | 0.9 | 1.3x |
+  | 104 | Q(U) droop | 11.7 | 0.9 | 13x |
+  | **Total** | | **99.6** | **6.2** | **16x** |
+
+  Cases with Q(U) control, LFSM/FSM or FRT guide curves benefit most. With `processes` > 1 the cases run in parallel, so the total run time is reduced correspondingly
 
 #### Utility Scripts
 
 - `plotter/psout_to_csv.py` moved to `utility_scripts/` and renamed to `convert_psout_to_csv.py`. The script now locates `process_psout.py` in the `plotter` folder automatically, and the default `--figureSetupPath` is `..\plotter\figureSetup.csv` ([#369](https://github.com/Energinet-SimTools/MTB/pull/369))
+- `convert_psout_to_csv.py`: `--psoutFolder` is now required and the script exits with an error if the folder is missing or contains no `.psout` files. If `--figureSetupPath` is omitted, all PGB output channel signals are extracted. The default `--outputRootFolder` is now the parent folder of `--psoutFolder`, the output folder is printed on completion, and a new `--decimal` option selects `,` (with `;` column separator, default) or `.` (with `,` column separator). A new `--list` option lists all PGB output channel signals in the first `.psout` file. MTB signals are always written (and listed) as `MTB\<signal>`, also when the MTB is not placed on the main canvas
+
+### Removed
+
+#### Utility Scripts
+
+- `list_psout_signals.py` removed; use `convert_psout_to_csv.py --list` instead
 
 ### Fixed
 
@@ -48,6 +74,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Blank rows in the figure and cursor setup files (e.g. from Excel) are now skipped ([#358](https://github.com/Energinet-SimTools/MTB/pull/358))
 - Improved error message when the MTB path is not found in a `.psout` file; the plotter now exits with code 1 ([#356](https://github.com/Energinet-SimTools/MTB/pull/356))
 - Clarified comments in `getUniqueEmtSignals` ([#357](https://github.com/Energinet-SimTools/MTB/pull/357))
+- The Q(U) t1 cursor metric now shows "metric error" instead of the text of the previous metric when it cannot be calculated
+- EMT `.csv`/`.zip` results (e.g. from `convert_psout_to_csv.py`) are now matched on the full signal path, e.g. `MTB\P_pu_PoC`, as for `.psout` files; previously only the last part of the name was used, so their signals were not found. Matching on the signal name only is kept for legacy (MTB 1.0) `.inf` results
+- `genGuide` is set to `False` (with a warning) when legacy `.inf` results are found, as guide curves are not supported for them; the plotter previously stopped with a `KeyError`
+- Fixed wrong column names in `getPsoutSignals()` when a signal array (a signal with several traces) is not the first signal; the array names were inserted at the start, shifting the names of the other signals
 
 #### General
 
