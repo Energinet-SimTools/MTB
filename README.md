@@ -24,6 +24,8 @@ MTB is intended to help facility owners and model providers evaluate simulation 
 
 The MTB plotter generates interactive, self-contained HTML reports built with Plotly, letting users pan, zoom, and toggle signals directly in the browser without any additional software. One HTML output file is generated per testcase (or Rank), with multiple plots covering line voltages, line currents, active and reactive current components, active power, reactive power, frequency, and more.
 
+In the unreleased MTB 2.0.1, guide-curve generation and `.psout` loading have been significantly sped up: a six-case plotter benchmark was approximately 16 times faster than 2.0.0. Results depend on the cases and environment; see the [changelog](CHANGELOG.md) for the benchmark conditions. The RfG guide curves currently support classical RfG cases only, not co-located plants with battery energy storage systems (BESS). Do not rely on them to assess co-location cases.
+
 <p align="left">
 	<img width="1000" alt="Zoomed view of MTB HTML plot output features" src="https://github.com/user-attachments/assets/522c623e-e778-41ec-a800-d4f807ae7a46" />
 </p>
