@@ -11,8 +11,8 @@ from datetime import datetime
 import argparse
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(SCRIPT_DIR, '..', 'plotter'))
-from process_psout import getPsoutSignals
-import mhi.psout
+from process_psout import listPsoutSignals
+from process_results import findMtbPath, toMtbSignalName, getAllMtbSignals, getFigureSetupSignals
 import numpy as np
 import pandas as pd
 
@@ -109,74 +109,19 @@ def getCaseSignalnames(emtSignalnamesDF, case):
     return signalnames
 
 
-def getPsoutSignalRecords(psoutFile):
+def printPsoutSignals(psoutFilePath):
     '''
-    Find all PGB output channel signals in an opened .psout file.
-    Returns a dict of {signal path: data record call}, where the signal path is relative to Root\\Main
-    (same format as figureSetup.csv) and the record's calls are the trace(s) of the signal.
+    Print all PGB output channel signal paths in the .psout file, sorted, with the array size for signal arrays.
+    MTB signals are listed as 'MTB\\<signal>', also if the MTB is not placed on the main canvas.
     '''
-    records = dict()
-
-    def traverse(node, currentPath=''):
-        for call in node.calls():
-            name = call.variables().get('Name', '')
-            source = call.variables().get('Source', '')
-            path = f'{currentPath}\\{name}' if currentPath else name
-            if source == 'PGB':
-                if path in records:
-                    print(f"Warning: Duplicate signal path '{path}'. Skipping...")
-                    continue
-                try:
-                    records[path] = psoutFile.call('Root/Main/' + path.replace('\\', '/') + '/0')
-                except Exception:
-                    print(f"Warning: Signal '{path}' could not be read. Skipping...")
-            elif source == 'Module':
-                traverse(call, path)
-
-    traverse(psoutFile.call('Root/Main'))
-    return records
-
-
-def listPsoutSignals(psoutFilePath):
-    '''
-    Print all PGB output channel signal paths in the .psout file, sorted, with the array size for signal arrays
-    '''
-    with mhi.psout.File(psoutFilePath) as psoutFile:
-        records = getPsoutSignalRecords(psoutFile)
-        print(f'PGB output channel signals in {psoutFilePath}:')
-        for path in sorted(records, key=str.lower):
-            numTraces = records[path].num_calls
-            print(f'  {path}' + (f'  [{numTraces}]' if numTraces > 1 else ''))
-        print(f'{len(records)} signal(s) found')
-
-
-def getAllPsoutSignals(psoutFilePath):
-    '''
-    Get all PGB output channel signals in the .psout file as a DataFrame with a 'time' column.
-    Column names are the module paths relative to Root\\Main (same format as figureSetup.csv),
-    with an '_<n>' suffix for each element of signal arrays.
-    '''
-    columns = dict()
-    time = None
-
-    with mhi.psout.File(psoutFilePath) as psoutFile:
-        run = psoutFile.run(0)
-        for path, record in getPsoutSignalRecords(psoutFile).items():
-            traces = [run.trace(traceCall) for traceCall in record.calls()]
-            if not traces:
-                continue
-            if time is None:
-                time = np.array(traces[0].domain.data)
-            for i, trace in enumerate(traces):
-                data = np.array(trace.data)
-                if data.shape != time.shape:
-                    print(f"Warning: Signal '{path}' has a different length than the time vector. Skipping...")
-                    break
-                columns[path if len(traces) == 1 else f'{path}_{i+1}'] = data
-
-    if time is None:
-        return pd.DataFrame()
-    return pd.DataFrame({'time': time, **columns})
+    signals = listPsoutSignals(psoutFilePath)
+    mtbPath = findMtbPath(path for path, _ in signals)
+    print(f'PGB output channel signals in {psoutFilePath}:')
+    if mtbPath and mtbPath != 'MTB':
+        print(f'  (The MTB is located at {mtbPath} and its signals are listed as MTB\\...)')
+    for path, numTraces in sorted(signals, key=lambda item: toMtbSignalName(item[0], mtbPath).lower()):
+        print(f'  {toMtbSignalName(path, mtbPath)}' + (f'  [{numTraces}]' if numTraces > 1 else ''))
+    print(f'{len(signals)} signal(s) found')
 
 
 def convertPsouts(psoutFilesPath, csvFolder, outFileType, lstSignalnames):
@@ -198,10 +143,10 @@ def convertPsouts(psoutFilesPath, csvFolder, outFileType, lstSignalnames):
             continue
         if not args.QUIET: print(f'Processing {psoutFileNameExt}')
         if lstSignalnames is None:
-            dfSignals = getAllPsoutSignals(psoutFilePath)
+            dfSignals = getAllMtbSignals(psoutFilePath)
         else:
             signalnames = getCaseSignalnames(lstSignalnames, case)
-            dfSignals = getPsoutSignals(psoutFilePath, signalnames)
+            dfSignals = getFigureSetupSignals(psoutFilePath, signalnames)
         if dfSignals.empty:
             print(f'Warning: No signals found for {psoutFileNameExt}. Skipping...')
             continue
@@ -225,7 +170,7 @@ def main():
         sys.exit(f'Error: No .psout files found in "{args.psoutFolder}".')
 
     if args.listSignals:
-        listPsoutSignals(psoutFilesPath[0])
+        printPsoutSignals(psoutFilesPath[0])
         return
 
     if args.figureSetupPath is None:

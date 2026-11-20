@@ -883,6 +883,11 @@ def main() -> None:
     print()
       
     resultDict = mapResultFiles(config)
+
+    # Guide curves require the full signal paths, e.g. 'MTB\mtb_s_pref_pu', which legacy (MTB 1.0) .inf results do not have
+    if config.genGuide and any(result.typ == ResultType.EMT_INF for results in resultDict.values() for result in results):
+        print('WARNING: Legacy .inf result files found. Guide curves are not supported for .inf results, genGuide is set to False.')
+        config.genGuide = False
     figureDict = readFigureSetup('figureSetup.csv')
     cursorDict = readCursorSetup('cursorSetup.csv')
     settingsDf = pd.read_excel(config.testcaseSheet, sheet_name='Settings', header=0)     #Read the 'Settings' sheet 

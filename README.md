@@ -17,8 +17,7 @@ MTB is intended to help facility owners and model providers evaluate simulation 
 > Regardless of which test cases are run or passed, the connected plant must under no circumstances cause grid instability or reduce the security of the grid. Passing the predefined (or any) MTB test cases does not by itself constitute approval. A model will not be approved unless there is full confidence, established through whatever additional analysis and testing is necessary, that this requirement is met.
 
 <p align="center">
-	<!-- <img src="https://github.com/user-attachments/assets/2264d07d-e99f-46ab-bbb1-4dceddcc614b" width="800" height="210" alt="MTB workflow from testcase workbook to simulation and plotting"> -->
-	<img width="1000" alt="image" src="https://github.com/user-attachments/assets/2bb9ffc7-150d-482e-b54d-af127151b8b5" />
+	<img width="1000" alt="MTB workflow from testcase workbook to simulation and plotting" src="https://raw.githubusercontent.com/wiki/Energinet-SimTools/MTB/MTB_workflow.svg" />
 </p>
 
 ## Python/Plotly Output Example
