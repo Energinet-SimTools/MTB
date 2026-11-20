@@ -205,13 +205,13 @@ def addResults(plots: List[go.Figure],
 
     SUBPLOT = (len(plots) == 1) # Check if output should be a subplot
     
-    pfFlatTIme = settingsDict['PF flat time']
-    pscadInitTime = settingsDict['PSCAD Initialization time']
-    
-    if genGuide: guide = genGuideResults(result, resultData, settingsDict,  caseDf, pscadInitTime)
+    if genGuide: guide = genGuideResults(result, resultData, settingsDict,  caseDf)
     
     rowPos = 1
     colPos = 1
+    
+    pfFlatTIme = settingsDict['PF flat time']
+    pscadInitTime = settingsDict['PSCAD Initialization time']
     
     fi = -1
     for figure in figures:
@@ -519,8 +519,13 @@ def drawPlot(rank: int,
     
     if genCursors:
         dfCursorsList = setupCursorDataFrame(ranksCursor)
-        
+
+    # Guide curves are drawn once per rank: from the first EMT result, or from the first RMS result if there is no EMT result
+    emtTypes = (ResultType.EMT_INF, ResultType.EMT_PSOUT, ResultType.EMT_CSV, ResultType.EMT_ZIP)
+    guideResult = next((r for r in resultList if r.typ in emtTypes), next((r for r in resultList if r.typ == ResultType.RMS), None))
+
     for result in resultList:
+        genGuide = config.genGuide and result is guideResult
         print(f'Processing: {result.fullpath}')
         if result.typ == ResultType.RMS:
             resultData = pd.read_csv(result.fullpath, sep=';', decimal=',', header=[0, 1])  # type: ignore
@@ -546,9 +551,9 @@ def drawPlot(rank: int,
             continue
 
         if config.genHTML:
-            addResults(htmlPlots, result, resultData, figureList, colorMap, config.htmlColumns, settingsDict, caseDf, config.genGuide)
+            addResults(htmlPlots, result, resultData, figureList, colorMap, config.htmlColumns, settingsDict, caseDf, genGuide)
         if config.genImage:
-            addResults(imagePlots, result, resultData, figureList, colorMap,config.imageColumns, settingsDict, caseDf, config.genGuide)
+            addResults(imagePlots, result, resultData, figureList, colorMap,config.imageColumns, settingsDict, caseDf, genGuide)
         if genCursors:
             addCursorMetrics(ranksCursor, dfCursorsList, result, resultData, settingsDict,  caseDf)
     
