@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Plotter
 
 - `sharedXaxis` option in the plotter `config.ini` to link x-axis zoom, pan and reset across all plots within each HTML page ([#348](https://github.com/Energinet-SimTools/MTB/pull/348), [#364](https://github.com/Energinet-SimTools/MTB/pull/364))
+- `MTBViewer.py` (experimental): interactive Qt desktop viewer for EMT and RMS results (`.psout`, `.csv` and `.parquet`), with case navigation, per-source on/off switches, guide curves, shared A/B cursors with metric tables, a `figureSetup.csv` editor and PNG/PDF/CSV export. Requires `PySide6` and `pyqtgraph`, which are added to `plotter/requirements.txt`. Loading and analysis of the results are in `results_data.py`, which has no GUI code and can be reused by other front ends
+
+#### Utility Scripts
+
+- `convert_csv_to_parquet.py`: convert [compressed] `.csv` result files from `convert_psout_to_csv.py` (PSCAD) or PowerFactory to `.parquet`. The column separator, decimal separator and number of header rows are detected automatically (requires `pyarrow`)
 
 ### Changed
 
@@ -27,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Maximum number of HTML columns increased to 4 ([#354](https://github.com/Energinet-SimTools/MTB/pull/354))
 - `PdfWriter` is now only imported when PDF generation is needed ([#354](https://github.com/Energinet-SimTools/MTB/pull/354))
-- The cursor metric formatting is moved to `formatCursorMetric()` in `cursor_functions.py`, so it can be reused for other cursor intervals and front ends
+- The cursor metric formatting is moved to `formatCursorMetric()` in `cursor_functions.py`, so it can be shared with `MTBViewer.py`
 - The generic `.psout` functions `getPsoutSignalRecords()`, `listPsoutSignals()` and `getAllPsoutSignals()` are moved from `convert_psout_to_csv.py` to `process_psout.py`. They use the real signal paths in the `.psout` file; the MTB naming (`MTB\<signal>`, also when the MTB is not placed on the main canvas) is applied separately with `findMtbPath()`, `toMtbSignalName()` and `fromMtbSignalName()` in `process_results.py`, which also has `getAllMtbSignals()` and `getFigureSetupSignals()` to read all signals or the figureSetup signals of a `.psout` file with MTB naming
 - The plotter is about 16 times faster, with identical results:
   - The row-by-row loops for the LFSM, Q(U) and FFC guide curves in `guide_functions.py` now use NumPy arrays
