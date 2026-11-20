@@ -42,6 +42,30 @@ The generated HTML reports include:
 10. **Plot Figure Legend** - lists the plotted signals. Click a legend item to hide or show the corresponding trace.
 11. **Plotly Buttons** - standard Plotly controls for downloading, zooming, panning, autoscaling, and resetting axes.
 
+## MTBViewer (Interactive Desktop Viewer) - Experimental
+
+> [!WARNING]
+> MTBViewer is experimental. Its features, settings and behaviour may change in future releases. Use `plotter.py` for the official HTML reports.
+
+`plotter/MTBViewer.py` is an interactive Qt desktop viewer for EMT and RMS results. It is an alternative to the HTML reports for exploring results, and it uses the same `config.ini`, `figureSetup.csv`, `cursorSetup.csv` and `testcases.xlsx`.
+
+```bash
+cd plotter
+python MTBViewer.py                  # uses config.ini next to MTBViewer.py
+python MTBViewer.py -c my_config.ini -r 104
+python MTBViewer.py -r 104 --export-png 104.png   # export a case without opening the window
+```
+
+- **Result files** - `.psout`, `.csv` (also `.zip`, `.gz`, `.bz2`, `.xz`), `.parquet` and legacy `.inf` files named `<project>_<rank>` in any number of `[Simulation data paths]` folders. Whether a result is EMT or RMS is determined by its signals, i.e. whether they match the `emt_signal_*` or `rms_signal_*` names in `figureSetup.csv`. Signals are matched on their full path, e.g. `MTB\P_pu_PoC` or `PV\Inverter\P_pu`; MTB signals are always named `MTB\...`, also when the MTB is not placed on the main canvas. Only legacy `.inf` results, whose signal names are unique and have no path, are matched on the signal name.
+- **Navigation** - Back, Next and a case drop-down (PgUp/PgDn or Alt+Left/Right). The next case is loaded in the background.
+- **Plots** - one plot per figure with linked time axes, independent x/y zoom (mouse wheel over an axis, right drag or the right-click menu), an on/off switch per source and guide curve per plot, and hide/show of single traces by clicking the legend. Figures can be hidden in *View > Figures*.
+- **Guide curves** - calculated in memory for each EMT result, as in the HTML reports.
+- **Cursors** - two cursors, A and B, shared by all plots. The selected metrics (start, end, delta, min, max, mean, gradients, response delay, rise/fall, settling time and overshoot) are shown for every visible trace between A and B, and the `cursorSetup.csv` metrics of the case in a second table. The `cursorSetup.csv` time ranges are available as presets.
+- **Figure setup** - edit `figureSetup.csv` with the signals found in the result files of the current case. Ticking an EMT signal also adds the equivalent RMS signal, if the pair is known from the other figures. *Save and apply* keeps a `.bak` copy of the original file.
+- **Export** - the current case as PNG or PDF, and the cursor tables as CSV.
+
+MTBViewer requires `PySide6` and `pyqtgraph` (included in `plotter/requirements.txt`), and `pyarrow` for `.parquet` files.
+
 ## MTB Quickstart Wiki Guides
 
 | Section | Page                                                                                                                        | Purpose                                                                                         |
