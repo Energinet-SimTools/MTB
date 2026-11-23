@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.1] - Unreleased
+## [2.0.1] - 2026-11-23
 
 ### Added
 
@@ -51,6 +51,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   | **Total** | | **99.6** | **6.2** | **16x** |
 
   Cases with Q(U) control, LFSM/FSM or FRT guide curves benefit most. With `processes` > 1 the cases run in parallel, so the total run time is reduced correspondingly
+- RfG guide curves currently support classical RfG cases only; co-located plants with battery energy storage systems (BESS) are not supported
+
+#### PSCAD Examples
+
+- Updated the PSCAD setup example to use the MTB library in its contained `MTB` folder and refreshed project metadata and CRC values ([#380](https://github.com/Energinet-SimTools/MTB/pull/380))
 
 #### Utility Scripts
 
